@@ -1,0 +1,21 @@
+Package: dsftools
+Type: Package
+Title: Common Tools for Fisheries Analyses
+Version: 0.1.0
+Author: Matt Tyers [aut, cre]
+Authors@R: person("Matt", "Tyers", email = "matt.tyers@alaska.gov",
+    role = c("aut", "cre"))
+Maintainer: Matt Tyers <matt.tyers@alaska.gov>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
+Depends: R (>= 4.0.0)
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+    
