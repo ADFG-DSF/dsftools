@@ -37,7 +37,7 @@ ASL_table <- function(age=NULL,
                       Nhat=NULL,
                       se_Nhat=NULL,
                       stratum_weights = NULL,
-                      verbose=FALSE) {  # default this from Nhat?
+                      verbose=FALSE) {
   # -------- globally dealing with inputs ----------
   # combining age/sex categories as available
   if(!is.null(sex) & !is.null(age)) {
@@ -53,17 +53,20 @@ ASL_table <- function(age=NULL,
   if(!is.null(stratum)) {
     if(verbose) print("stratified")
     # checking that inputs make sense
-    if(!inherits(stratum, "integer")) {
-      stop("Stratum values must be positive whole numbers (1, 2, 3, etc.)")  ############### this fails
-    }
+
+    # if(!inherits(stratum, "integer")) {
+    #   stop("Stratum values must be positive whole numbers (1, 2, 3, etc.)")  ############### this fails
+    # }
     if(length(stratum_weights) != max(stratum) & length(Nhat) != max(stratum)) {
       stop("Length of stratum weights does not equal max stratum value")
     }
+
     # -- Stratified without error in Nhats --
     if(is.null(se_Nhat)) {
       if(verbose) print("without error in Nhat")
       # pulling these equations from the Jim Creek report
       if(length(unique(cats)) > 1) {
+
         # --- if there are proportions to estimate ---
         ntz <- table(stratum, cats, useNA="no")
         nt <- rowSums(ntz)
@@ -75,7 +78,7 @@ ASL_table <- function(age=NULL,
           FPC_vec <- (Nt-nt)/(Nt-1)
         }
         ptz <- ntz/nt
-        vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec # *(1-(nt/Nt))    # betterize fpc here?  ((Nt-nt)/(Nt-1))
+        vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec
         Ntz <- Nt*ptz
         vNtz <- (Nt^2)*vptz
         Nz <- colSums(Ntz)
@@ -86,8 +89,7 @@ ASL_table <- function(age=NULL,
         out$se_phat <- sqrt(vpz)
         out$Nhat <- Nz
         out$se_Nhat <- sqrt(vNz)
-        # estimating proportions..
-        # estimating abundance
+
         # summarizing length
         if(!is.null(length)) {
           xbartz <- tapply(length, list(stratum, cats), mean)
@@ -117,10 +119,9 @@ ASL_table <- function(age=NULL,
         xbart <- tapply(length, stratum, mean, na.rm=TRUE)
         vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
         out$mn_length <- sum(Nt*xbart/sum(Nt))
-        # out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*(1-(nt/Nt))*vxbart))
-        out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart*FPC_vec)) #*((Nt-nt)/(Nt-1)) inside
-        out$min_length <- min(length, na.rm=TRUE) # tapply(length, cats, min, na.rm=TRUE)
-        out$max_length <- max(length, na.rm=TRUE) # tapply(length, cats, max, na.rm=TRUE)
+        out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart*FPC_vec))
+        out$min_length <- min(length, na.rm=TRUE)
+        out$max_length <- max(length, na.rm=TRUE)
       }
     } else {
       # -- Stratified with error in Nhats --
@@ -129,6 +130,7 @@ ASL_table <- function(age=NULL,
       # summarizing length
       if(verbose) print("WITH error in Nhat")
       # modifying these equations from the Jim Creek report
+
       if(length(unique(cats)) > 1) {
         # --- if there are proportions to estimate ---
         ntz <- table(stratum, cats, useNA="no")
@@ -140,25 +142,20 @@ ASL_table <- function(age=NULL,
           FPC_vec <- (Nt-nt)/(Nt-1)
         }
         ptz <- ntz/nt
-        vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec # *(1-(nt/Nt))    # betterize fpc here?  ((Nt-nt)/(Nt-1))
+        vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec
         Ntz <- Nt*ptz
-        # vNtz <- (Nt^2)*vptz
         vNtz <- ((Nt^2)*vptz) + ((ptz^2)*(se_Nhat^2)) - (vptz*(se_Nhat^2)) ### Goodman
         Nz <- colSums(Ntz)
         vNz <- colSums(vNtz)
         pz <- Nz/sum(Nt)
-        # vpz <- vNz/(sum(Nt)^2)
 
         # delta method
         # covNzSum <- vNz  ## this is a minimum, there should be more
-        # ptz1 <- ptz
-        ptz1 <- (ntz+1)/rowSums(ntz+1)
-        covNzSum <- colSums((se_Nhat^2)*ptz1, na.rm=TRUE)
+        covNzSum <- colSums((se_Nhat^2)*ptz, na.rm=TRUE)  # this seems unbiased!!
 
-        # vpz <- ((Nz/sum(Nz))^2)*(vNz/(Nz^2) + sum(vNz)/((sum(Nz))^2) - 2*covNzSum/(Nz*sum(Nz)))
         vpz <- ((Nz/sum(Nz))^2)*(vNz/(Nz^2) + sum(se_Nhat^2)/((sum(Nz))^2) - 2*covNzSum/(Nz*sum(Nz)))
         out$phat <- pz
-        out$se_phat <- sqrt(vpz)    ####### THIS OVERESTIMATES QUITE A BIT, guess that's not totally bad
+        out$se_phat <- sqrt(vpz)
         if(any(is.na(out$se_phat))) {
           print(ntz)
           print(vpz)
@@ -166,8 +163,7 @@ ASL_table <- function(age=NULL,
 
         out$Nhat <- Nz
         out$se_Nhat <- sqrt(vNz)   ## this one seems unbiased still
-        # estimating proportions..
-        # estimating abundance
+
         # summarizing length
         if(!is.null(length)) {
           xbartz <- tapply(length, list(stratum, cats), mean)
@@ -185,7 +181,6 @@ ASL_table <- function(age=NULL,
           out$max_length <- tapply(length, cats, max, na.rm=TRUE)
         }
       } else {
-        if(verbose) print("method does not yet exist.")
         # --- if there are NO proportions to estimate ---
         nt <- table(stratum, is.na(length))[,1] # table(stratum)   ### now excludes NA values in length
         if(is.null(Nhat) & !is.null(stratum_weights)) {
@@ -218,9 +213,6 @@ ASL_table <- function(age=NULL,
                                                                  ((2*covSumNtSum)/(sum(Nhat)*sum(Nhat*xbart)))))
         out$min_length <- min(length, na.rm=TRUE)
         out$max_length <- max(length, na.rm=TRUE)
-        # out2 <- list(vNoverSumN=vNoverSumN,
-        #              xbart=xbart,
-        #              vxbart=vxbart)
       }
     }
   }
@@ -228,15 +220,18 @@ ASL_table <- function(age=NULL,
   if(is.null(stratum)) {
     if(verbose) print("not stratified")
     FPC <- ifelse(!is.null(Nhat), (Nhat-sum(out$n))/(Nhat-1), 1)
+
     # checking that inputs make sense
     if(length(Nhat) > 1 | length(se_Nhat) > 1 | length(stratum_weights) > 1) {
       stop("Stratum totals or weights are given, but no strata")
     }
+
     # estimating proportions..
     if(length(unique(cats)) > 1) {
       out_ntot <- sum(out$n)
       out$phat <- out$n/out_ntot
       out$se_phat <- sqrt(out$phat*(1-out$phat)/(out_ntot-1)*FPC)     ### added fpc
+
       # estimating abundance..
       if(!is.null(Nhat)) {
         out$Nhat <- Nhat * out$phat
@@ -252,6 +247,7 @@ ASL_table <- function(age=NULL,
         }
       }
     }
+
     # and summarizing lengths..
     if(!is.null(length)) {
       out$mn_length <- tapply(length, cats, mean, na.rm=TRUE)
@@ -263,7 +259,6 @@ ASL_table <- function(age=NULL,
     }
   }
   return(out)
-  # return(out2)
 }
 
 # # simulating some fake data..

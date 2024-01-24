@@ -16,36 +16,36 @@ ASL_table(
 )
 }
 \arguments{
-\item{age}{Vector of ages.  If the default (`NULL`) is accepted, age will be
+\item{age}{Vector of ages.  If the default (\code{NULL}) is accepted, age will be
 omitted from the resulting table.}
 
-\item{sex}{Vector of sex.  If the default (`NULL`) is accepted, sex will be
+\item{sex}{Vector of sex.  If the default (\code{NULL}) is accepted, sex will be
 omitted from the resulting table.}
 
-\item{length}{Vector of length.  If the default (`NULL`) is accepted, length
+\item{length}{Vector of length.  If the default (\code{NULL}) is accepted, length
 will be omitted from the resulting table.}
 
 \item{stratum}{Optional vector of stratum, if stratified estimators will be
 used.  This must be formatted as positive whole numbers (1, 2, 3, etc).
-Defaults to `NULL`.}
+Defaults to \code{NULL}.}
 
 \item{Nhat}{Optional vector of abundance for each stratum, if stratified
 estimators will be used.  The length of this vector must correspond to the
-maximum value in the `stratum=` argument.  Defaults to `NULL`.}
+maximum value in the \verb{stratum=} argument.  Defaults to \code{NULL}.}
 
 \item{se_Nhat}{Optional vector of the standard error of abundance for each
 stratum, if stratified estimators will be used and by-stratum abundance is
 considered to have measurement error.    The length of this vector must
-correspond to the maximum value in the `stratum=` argument.  Defaults to `NULL`.}
+correspond to the maximum value in the \verb{stratum=} argument.  Defaults to \code{NULL}.}
 
 \item{stratum_weights}{Optional vector of weights for each stratum, if
 relative weights are known but abundance is not.  Using this argument rather
-than `Nhat` will also omit the Finite Population Correction factor (FPC) from
+than \code{Nhat} will also omit the Finite Population Correction factor (FPC) from
 calculations, but weights are treated as constant (without error), likely
-underestimating variance.  Defaults to `NULL`.}
+underestimating variance.  Defaults to \code{NULL}.}
 
 \item{verbose}{Whether to print messages corresponding to the method used.
-Defaults to `FALSE`.}
+Defaults to \code{FALSE}.}
 }
 \value{
 A data.frame with rows corresponding to categories of age and/or sex,
