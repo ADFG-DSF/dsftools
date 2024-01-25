@@ -50,6 +50,16 @@ Defaults to \code{FALSE}.}
 \value{
 A data.frame with rows corresponding to categories of age and/or sex,
 depending on data inputs.
+\subsection{Stratified}{
+
+Here is an equation
+
+\deqn{
+\hat{p}_{tz}=\frac{n_{tz}}{n_t}
+}
+
+Here is text
+}
 }
 \description{
 FILL IN DESCRIPTION HERE

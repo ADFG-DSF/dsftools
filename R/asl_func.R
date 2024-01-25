@@ -26,6 +26,16 @@
 #' Defaults to `FALSE`.
 #' @return A data.frame with rows corresponding to categories of age and/or sex,
 #' depending on data inputs.
+#'
+#' ## Stratified
+#'
+#' Here is an equation
+#'
+#' \deqn{
+#' \hat{p}_{tz}=\frac{n_{tz}}{n_t}
+#' }
+#'
+#' Here is text
 #' @author Matt Tyers
 #' @examples
 #'
@@ -94,7 +104,8 @@ ASL_table <- function(age=NULL,
         if(!is.null(length)) {
           xbartz <- tapply(length, list(stratum, cats), mean)
           vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
-          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom
+          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom *
+            (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
           xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=T)
           # Taylor series expansion (Mood et al. 1974)
@@ -168,7 +179,8 @@ ASL_table <- function(age=NULL,
         if(!is.null(length)) {
           xbartz <- tapply(length, list(stratum, cats), mean)
           vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
-          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom
+          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom *
+            (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
           xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=T)
           # Taylor series expansion (Mood et al. 1974)
@@ -220,6 +232,7 @@ ASL_table <- function(age=NULL,
   if(is.null(stratum)) {
     if(verbose) print("not stratified")
     FPC <- ifelse(!is.null(Nhat), (Nhat-sum(out$n))/(Nhat-1), 1)
+    FPC_mn <- FPC   # FPC used for variance of mean length
 
     # checking that inputs make sense
     if(length(Nhat) > 1 | length(se_Nhat) > 1 | length(stratum_weights) > 1) {
@@ -245,14 +258,18 @@ ASL_table <- function(age=NULL,
                                 ((out$phat^2)*(se_Nhat^2)) -
                                 ((out$se_phat^2)*(se_Nhat^2)))
         }
+
+        # updating FPC for mean if there are categories AND est abundance
+        FPC_mn <- (out$Nhat - out$n)/(out$Nhat - 1)
       }
     }
 
     # and summarizing lengths..
     if(!is.null(length)) {
       out$mn_length <- tapply(length, cats, mean, na.rm=TRUE)
-      out_sd_length <- tapply(length, cats, sd, na.rm=TRUE)*sqrt(FPC)     ### added fpc
       n_notNA <- tapply(!is.na(length), cats, sum)
+      out_sd_length <- tapply(length, cats, sd, na.rm=TRUE) * sqrt(FPC_mn)
+        # sqrt((out$Nhat-n_notNA)/(out$Nhat-1)) ## NEW FPC    # sqrt(FPC)     ### added fpc
       out$se_length <- out_sd_length/sqrt(n_notNA)
       out$min_length <- tapply(length, cats, min, na.rm=TRUE)
       out$max_length <- tapply(length, cats, max, na.rm=TRUE)
@@ -275,13 +292,21 @@ ASL_table <- function(age=NULL,
 #   # age=age,
 #   # sex=sex,
 #   length=length,
-#   # Nhat=10000,
-#   # se_Nhat=5000
-#   stratum_weights=Nhat/10,
-#   stratum=stratum
+#   Nhat=10000,
+#   # se_Nhat=1000,
+#   # Nhat=Nhat,
+#   se_Nhat=5000,
+#   # se_Nhat=Nhat/10,
+#   # stratum_weights=Nhat/10,
+#   # stratum=stratum
 # )
 
-# include levels for all possible combinations (including those that don't occur?)
-# incorporate fpc??
-# think through what (should) happen with NA
-# sampling_weights instead of Nhat - no fpc ..... calculations work with weights IN Nhat vec (except FPC), it all scales
+
+# verify_ASL_table <- function(nt = NULL, # sample size for each stratum
+#                              Nt = NULL,  # abundance for each stratum
+#                              se_Nt = NULL, # (possible) SE for abundance by stratum,
+#                              mn_length = NULL, # mean length FOR EACH AGE
+#                              sd_length = NULL, # sd length FOR EACH AGE
+#                              ptz = NULL) { # matrix of probabilities of each age BY stratum
+#
+# }
