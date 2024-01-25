@@ -302,11 +302,115 @@ ASL_table <- function(age=NULL,
 # )
 
 
-# verify_ASL_table <- function(nt = NULL, # sample size for each stratum
-#                              Nt = NULL,  # abundance for each stratum
-#                              se_Nt = NULL, # (possible) SE for abundance by stratum,
-#                              mn_length = NULL, # mean length FOR EACH AGE
-#                              sd_length = NULL, # sd length FOR EACH AGE
-#                              ptz = NULL) { # matrix of probabilities of each age BY stratum
-#
-# }
+verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each stratum
+                             Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+                             se_Nt = 0.2*Nt, # (possible) SE for abundance by stratum,
+                             mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+                             sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+                             ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                                          c(1,2,5,5,2),
+                                          c(2,5,3,2,1),
+                                          c(5,4,3,1,1)),
+                                          byrow=TRUE,
+                                          nrow=length(nt),
+                                          ncol=length(mn_length)),
+                             nsim=1000,    # number of simulated replicates
+                             plot_pop=TRUE) {   # whether to make summary plots of pop & one sample
+
+  # check inputs: length(nt) vs length(Nt) vs. length(se_Nt) vs.....
+  # check inputs: length(mn_length) vs length(sd_length) vs....
+
+  nstrata <- length(nt)
+  nage <- length(mn_length)
+
+  ## constructing vectors at the POPULATION level
+  # stratum
+  t <- rep(1,Nt[1])
+  for(i in 2:length(Nt)) t <- c(t, rep(i, Nt[i]))
+
+  # age
+  age_sim <- NA*t
+  for(i_t in 1:nstrata) {
+    age_sim[t==i_t] <- sample(x=1:nage, size=sum(t==i_t), prob=ptz[i_t,],replace=TRUE)
+  }
+  # age_sim[t==1] <- sample(x=1:5, size=sum(t==1), prob=c(1,2,3,4,5), replace=T)
+
+  # length
+  length_sim <- NA*t
+  for(i_z in 1:nage) {
+    length_sim[age_sim==i_z] <- rnorm(sum(age_sim==i_z), mn_length[i_z], sd_length[i_z])
+  }
+
+  ### LEAVE IT OPEN FOR age_sim=NULL and length_sim=NULL
+
+  # storing graphics state to save
+  parmfrow <- par("mfrow")
+  on.exit(par(mfrow=parmfrow))  # making sure to re-set graphics state
+
+  # # plotting simulated population
+  # mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age")
+  # boxplot(length_sim~age_sim, xlab="Age", ylab="Length")
+  # boxplot(length_sim~t, xlab="Stratum", ylab="Length")
+
+
+
+  # simulate once to set up output array (yes this is a hack)
+  thesample <- sample(seq_along(t)[t==1], size=nt[1])
+  if(length(nt) > 1) {
+    for(i_t in 2:nstrata) {
+      thesample <- c(thesample, sample(seq_along(t)[t==i_t], size=nt[i_t]))
+    }
+  }
+  # table(t[thesample])  # making sure it worked
+
+  # plotting population & one sample (optionally)
+  if(plot_pop) {
+    mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age", main="Population")
+    mosaicplot(table(t[thesample],age_sim[thesample]), xlab="Stratum", ylab="Age", main="Sample")
+    boxplot(length_sim~age_sim, xlab="Age", ylab="Length", main="Population")
+    boxplot(length_sim[thesample]~age_sim[thesample], xlab="Age", ylab="Length", main="Sample")
+    boxplot(length_sim~t, xlab="Stratum", ylab="Length", main="Population")
+    boxplot(length_sim[thesample]~t[thesample], xlab="Stratum", ylab="Length", main="Sample")
+  }
+
+  Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+  thetable <- ASL_table(age=age_sim[thesample],
+                        length=length_sim[thesample],
+                        stratum=as.integer(t[thesample]),
+                        Nhat=Nhat_sim,
+                        se_Nhat=se_Nt)  # find a way to add stratum_weights???
+
+  # initiate all stuff to store
+  results <- array(dim=c(nrow(thetable), ncol(thetable), nsim))
+
+  # then loop nsim times!!!
+  for(i_sim in 1:nsim) {
+    # first take a sample of fish
+    thesample <- sample(seq_along(t)[t==1], size=nt[1])
+    if(length(nt) > 1) {
+      for(i_t in 2:nstrata) {
+        thesample <- c(thesample, sample(seq_along(t)[t==i_t], size=nt[i_t]))
+      }
+    }
+    # table(t[thesample])  # making sure it worked
+
+    Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+    thetable <- ASL_table(age=age_sim[thesample],
+                          length=length_sim[thesample],
+                          stratum=as.integer(t[thesample]),
+                          Nhat=Nhat_sim,
+                          se_Nhat=se_Nt)  # find a way to add stratum_weights???
+    results[,,i_sim] <- as.matrix(thetable)
+  }
+  dimnames(results)[1:2] <- dimnames(thetable)
+
+  phat_sim <- results[,dimnames(results)[[2]]=="phat",]
+  phat_true <- as.numeric(table(age_sim)/sum(Nt))
+  boxplot(t(phat_sim), ylim=range(phat_true, phat_sim, na.rm=TRUE),
+          main="p_hat", xlab="Age",
+          border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+  points(phat_true, col=2, pch=16)
+  legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+         fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+
+}
