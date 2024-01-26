@@ -302,29 +302,424 @@ ASL_table <- function(age=NULL,
 # )
 
 
-verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each stratum
-                             Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
-                             se_Nt = 0.2*Nt, # (possible) SE for abundance by stratum,
-                             mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
-                             sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
-                             ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
-                                          c(1,2,5,5,2),
-                                          c(2,5,3,2,1),
-                                          c(5,4,3,1,1)),
-                                          byrow=TRUE,
-                                          nrow=4,
-                                          ncol=5),
-                             nsim=1000,    # number of simulated replicates
-                             plot_pop=TRUE) {   # whether to make summary plots of pop & one sample
 
-  # check inputs: length(nt) vs length(Nt) vs. length(se_Nt) vs.....
-  # check inputs: length(mn_length) vs length(sd_length) vs....
+
+#' Empirical Verification of the Methods Used in `ASL_table()`
+#' @description This function draws many samples from a population, given
+#' population and sample characteristics supplied by the user, or else one of
+#' twelve possible cases designed to cover all methods used in `ASL_table()`.
+#'
+#' The sampling distributions are approximated by simulation for all estimators of age
+#' proportions, abundances, and mean lengths, and their respective standard
+#' errors. The sampling distributions are then graphically compared to true
+#' values (in the case of simulated point estimates) or empirical standard deviations of
+#' simulated point estimates (in the case of simulated standard errors.)
+#'
+#' It should be noted that all simulated estimation is performed using the
+#' current version of the `ASL_table()` function; therefore any bias or errors
+#' that are identified should indicate a bug or incorrect derivation!
+#'
+#' Twelve pre-determined cases may be used in the `case=` argument, depending on
+#' whether a stratified sampling scheme is used, whether abundance is known or
+#' estimated with error, and whether estimates pertaining to categorical (age)
+#' and/or numeric (length) values is to be performed.
+#' @param case If a pre-determined case is to be used.  Allowed values are
+#' `"stratified_witherror_lengthage"`, `"stratified_witherror_age"`, `"stratified_witherror_length"`,
+#' `"stratified_lengthage"`, `"stratified_age"`, `"stratified_length"`,
+#' `"pooled_witherror_lengthage"`, `"pooled_witherror_age"`, `"pooled_witherror_length"`
+#' `"pooled_lengthage"`, `"pooled_age"`, or `"pooled_length"`. If the default
+#' (`NULL`) is accepted, all simulation parameters below must be supplied by the user.
+#' @param nstrata Number of sampling strata
+#' @param nage Number of age categories
+#' @param nt Sample size for each stratum
+#' @param Nt Abundance for each stratum
+#' @param se_Nt Optional vector of standard errors of abundance for each stratum
+#' Defaults to `NULL`, implying abundance is known without error.
+#' @param mn_length Vector of mean lengths for each age category.  Defaults to
+#' `NULL`, implying lengths were not considered.
+#' @param sd_length Vector of standard deviations for each age category.  Defaults to
+#' `NULL`, implying lengths were not considered.
+#' @param ptz Matrix of probabilities of each age by stratum, with rows
+#' corresponding to strata and columns corresponding to ages.  The probabilities
+#' for each row will be normalized before simulation, therefore summing to one
+#' is not required.  If a pooled (non-stratified) sample is to be taken and
+#' age categories are to be considered, this should be supplied as a vector with
+#' length equal to the number of ages.
+#' @param nsim Number of simulated replicates.  Defaults to `1000`, but more is recommended.
+#' @param plot_pop Whether to make summary plots of the simulated population and
+#' one representative sample, in addition to the plots produced in simulation.
+#' Defaults to `TRUE`.
+#' @param verbose Whether to print the parameters used in simulation to the console,
+#' if one of the `case`s is accepted, as well as printing the method used within
+#' `ASL_table()`.  Defaults to `TRUE`.
+#' @return `NULL`
+#' @author Matt Tyers
+#' @examples
+#' par(mfrow=c(2,2))
+#' verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
+#'
+#'
+#' \dontrun{
+#' nsim <- 5000
+#' cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
+#' "stratified_witherror_length", "stratified_lengthage", "stratified_age",
+#' "stratified_length", "pooled_witherror_lengthage", "pooled_witherror_age",
+#' "pooled_witherror_length" "pooled_lengthage", "pooled_age", "pooled_length")
+#' for(case_i in cases) {
+#'   par(mfrow=c(3,2))
+#'   verify_ASL_table(case=case_i, nsim=5000)
+#' }
+#' }
+#' @export
+verify_ASL_table <- function(case=NULL,   # should this default to NULL?
+                             nstrata,
+                             nage,
+                             nt,   # c(100, 100, 100, 100), # sample size for each stratum
+                             Nt,   # c(10000, 20000, 30000, 40000),  # abundance for each stratum
+                             se_Nt = NULL,   # 0.2*Nt, # (possible) SE for abundance by stratum,
+                             mn_length = NULL,   # c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+                             sd_length = NULL,   # c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+                             ptz = NULL,   # matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                                          # c(1,2,5,5,2),
+                                          # c(2,5,3,2,1),
+                                          # c(5,4,3,1,1)),
+                                          # byrow=TRUE,
+                                          # nrow=4,
+                                          # ncol=5),
+                             nsim=1000,   # 1000,    # number of simulated replicates
+                             plot_pop=TRUE,   # whether to make summary plots of pop & one sample
+                             verbose=TRUE) {  # whether to output cases in sim function
+
+  ### pre-populate cases
+  if(!is.null(case)) {
+    if(case=="stratified_witherror_lengthage") {
+      nstrata <- 4
+      nage <- 5
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- 0.2*c(10000, 20000, 30000, 40000) # (possible) SE for abundance by stratum,
+      mn_length <- c(150, 200, 250, 300, 350) # mean length FOR EACH AGE
+      sd_length <- c(40, 50, 60, 70, 80) # sd length FOR EACH AGE
+      ptz <- matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                     c(1,2,5,5,2),
+                     c(2,5,3,2,1),
+                     c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 5,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = 0.2*c(10000, 20000, 30000, 40000), # (possible) SE for abundance by stratum
+mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+               c(1,2,5,5,2),
+               c(2,5,3,2,1),
+               c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+
+")
+      }
+    }
+    if(case=="stratified_witherror_age") {
+      nstrata <- 4
+      nage <- 5
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- 0.2*c(10000, 20000, 30000, 40000) # (possible) SE for abundance by stratum,
+      mn_length <- NULL # mean length FOR EACH AGE
+      sd_length <- NULL # sd length FOR EACH AGE
+      ptz <- matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                      c(1,2,5,5,2),
+                      c(2,5,3,2,1),
+                      c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+      # mn_length=NULL, sd_length=NULL
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 5,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = 0.2*c(10000, 20000, 30000, 40000), # (possible) SE for abundance by stratum
+mn_length = NULL, # mean length FOR EACH AGE
+sd_length = NULL, # sd length FOR EACH AGE
+ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                c(1,2,5,5,2),
+                c(2,5,3,2,1),
+                c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+")
+      }
+    }
+    if(case=="stratified_witherror_length") {
+      nstrata <- 4
+      nage <- 1
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- 0.2*c(10000, 20000, 30000, 40000) # (possible) SE for abundance by stratum,
+      mn_length <- 300 # mean length FOR EACH AGE
+      sd_length <- 70 # sd length FOR EACH AGE
+      ptz <- NULL
+      # mn_length=300, sd_length=70, ptz=NULL
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 1,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = 0.2*c(10000, 20000, 30000, 40000), # (possible) SE for abundance by stratum
+mn_length = 300, # mean length FOR EACH AGE
+sd_length = 70, # sd length FOR EACH AGE
+ptz = NULL
+")
+      }
+    }
+    if(case=="stratified_lengthage") {
+      nstrata <- 4
+      nage <- 5
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- c(150, 200, 250, 300, 350) # mean length FOR EACH AGE
+      sd_length <- c(40, 50, 60, 70, 80) # sd length FOR EACH AGE
+      ptz <- matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                      c(1,2,5,5,2),
+                      c(2,5,3,2,1),
+                      c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 5,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                c(1,2,5,5,2),
+                c(2,5,3,2,1),
+                c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+")
+      }
+      # se_Nt = NULL
+    }
+    if(case=="stratified_age") {
+      nstrata <- 4
+      nage <- 5
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- NULL # mean length FOR EACH AGE
+      sd_length <- NULL # sd length FOR EACH AGE
+      ptz <- matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                      c(1,2,5,5,2),
+                      c(2,5,3,2,1),
+                      c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+      # se_Nt = NULL, mn_length=NULL, sd_length=NULL
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 5,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = NULL, # mean length FOR EACH AGE
+sd_length = NULL, # sd length FOR EACH AGE
+ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+                c(1,2,5,5,2),
+                c(2,5,3,2,1),
+                c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5)
+")
+      }
+    }
+    if(case=="stratified_length") {
+      nstrata <- 4
+      nage <- 1
+      nt <- c(100, 100, 100, 100) # sample size for each stratum
+      Nt <- c(10000, 20000, 30000, 40000)  # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- 300 # mean length FOR EACH AGE
+      sd_length <- 70 # sd length FOR EACH AGE
+      ptz <- NULL
+      # se_Nt = NULL, mn_length=300, sd_length=70, ptz=NULL
+      if(verbose) {
+        cat("
+nstrata = 4,
+nage = 1,
+nt = c(100, 100, 100, 100), # sample size for each stratum
+Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = 300, # mean length FOR EACH AGE
+sd_length = 70, # sd length FOR EACH AGE
+ptz = NULL
+")
+      }
+    }
+    if(case=="pooled_witherror_lengthage") {
+      nstrata <- 1
+      nage <- 5
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000  # abundance for each stratum
+      se_Nt <- 0.2*10000 # (possible) SE for abundance by stratum,
+      mn_length <- c(150, 200, 250, 300, 350) # mean length FOR EACH AGE
+      sd_length <- c(40, 50, 60, 70, 80) # sd length FOR EACH AGE
+      ptz <- 1:5
+      # ptz=1:5, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 5,
+nt = 400, # sample size for each stratum
+Nt = 10000,  # abundance for each stratum
+se_Nt = 0.2*10000, # (possible) SE for abundance by stratum
+mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+ptz = 1:5
+")
+      }
+    }
+    if(case=="pooled_witherror_age") {
+      nstrata <- 1
+      nage <- 5
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000  # abundance for each stratum
+      se_Nt <- 0.2*10000 # (possible) SE for abundance by stratum,
+      mn_length <- NULL # mean length FOR EACH AGE
+      sd_length <- NULL # sd length FOR EACH AGE
+      ptz <- 1:5
+      # mn_length=NULL, sd_length=NULL, ptz=1:5, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 5,
+nt = 400, # sample size for each stratum
+Nt = 10000,  # abundance for each stratum
+se_Nt = 0.2*10000, # (possible) SE for abundance by stratum
+mn_length = NULL, # mean length FOR EACH AGE
+sd_length = NULL, # sd length FOR EACH AGE
+ptz = 1:5
+")
+      }
+    }
+    if(case=="pooled_witherror_length") {
+      nstrata <- 1
+      nage <- 1
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000  # abundance for each stratum
+      se_Nt <- 0.2*10000 # (possible) SE for abundance by stratum,
+      mn_length <- 300 # mean length FOR EACH AGE
+      sd_length <- 70 # sd length FOR EACH AGE
+      ptz <- NULL
+      # mn_length=300, sd_length=70, ptz=NULL, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 1,
+nt = 400, # sample size for each stratum
+Nt = 10000,  # abundance for each stratum
+se_Nt = 0.2*10000, # (possible) SE for abundance by stratum
+mn_length = 300, # mean length FOR EACH AGE
+sd_length = 70, # sd length FOR EACH AGE
+ptz = NULL
+")
+      }
+    }
+    if(case=="pooled_lengthage") {
+      nstrata <- 1
+      nage <- 5
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000  # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- c(150, 200, 250, 300, 350) # mean length FOR EACH AGE
+      sd_length <- c(40, 50, 60, 70, 80) # sd length FOR EACH AGE
+      ptz <- 1:5
+      # se_Nt = NULL, ptz=1:5, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 5,
+nt = 400, # sample size for each stratum
+Nt = 10000,  # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+ptz = 1:5
+")
+      }
+    }
+    if(case=="pooled_age") {
+      nstrata <- 1
+      nage <- 5
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000  # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- NULL # mean length FOR EACH AGE
+      sd_length <- NULL # sd length FOR EACH AGE
+      ptz <- 1:5
+      # se_Nt = NULL, mn_length=NULL, sd_length=NULL, ptz=1:5, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 5,
+nt = 400, # sample size for each stratum
+Nt = 10000,  # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = NULL, # mean length FOR EACH AGE
+sd_length = NULL, # sd length FOR EACH AGE
+ptz = 1:5
+")
+      }
+    }
+    if(case=="pooled_length") {
+      nstrata <- 1
+      nage <- 1
+      nt <- 400 # sample size for each stratum
+      Nt <- 10000 # abundance for each stratum
+      se_Nt <- NULL # (possible) SE for abundance by stratum,
+      mn_length <- 300 # mean length FOR EACH AGE
+      sd_length <- 70 # sd length FOR EACH AGE
+      ptz <- NULL
+      # se_Nt = NULL, mn_length=300, sd_length=70, ptz=NULL, Nt=10000, nt=100
+      if(verbose) {
+        cat("
+nstrata = 1,
+nage = 1,
+nt = 400, # sample size for each stratum
+Nt = 10000, # abundance for each stratum
+se_Nt = NULL, # (possible) SE for abundance by stratum
+mn_length = 300, # mean length FOR EACH AGE
+sd_length = 70, # sd length FOR EACH AGE
+ptz = NULL
+")
+      }
+    }
+  }
+
+  # pre-fixing ptz
+  if(is.null(dim(ptz)) & !is.null(ptz)) {
+    ptz <- t(as.matrix(ptz))
+  }
+
+  # check inputs: length(nt) vs length(Nt) vs. length(se_Nt) vs nrow(ptz)
+  if(length(nt)!=nstrata) stop("length(nt) should equal nstrata.")
+  if(length(Nt)!=nstrata) stop("length(Nt) should equal nstrata.")
+  if(!is.null(se_Nt) & (length(se_Nt)!=nstrata)) stop("length(se_Nt) should equal nstrata.")
+  if(!is.null(ptz)) {
+    if(nrow(ptz)!=nstrata) stop("nrow(ptz) should equal nstrata.")
+  }
+
+  # check inputs: length(mn_length) vs length(sd_length) vs ncol(ptz)
+  if(!is.null(mn_length) & (length(mn_length)!=nage)) stop("length(mn_length) should equal nage.")
+  if(!is.null(sd_length) & (length(sd_length)!=nage)) stop("length(sd_length) should equal nage.")
+  if(length(sd_length) != length(mn_length)) stop("mn_length and sd_length should have corresponding length.")
+  if(!is.null(ptz)) {
+    if(nage>1 & ncol(ptz)!=nage) stop("ncol(ptz) or length(ptz) must equal nage.")
+  }
 
   #### no age means mn_length and sd_length have length 1, and ptz will be NULL
   #### no length means mn_length and sd_length will be NULL
   #### no strata means nt and Nt will be length 1 and ptz will be a vector
 
-  nstrata <- length(nt)
+  # nstrata <- length(nt)
 
 
   ## constructing vectors at the POPULATION level
@@ -335,10 +730,7 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
   }
 
   # age
-  if(is.null(dim(ptz)) & !is.null(ptz)) {
-    ptz <- t(as.matrix(ptz))
-  }
-  nage <- ifelse(!is.null(mn_length), length(mn_length), ncol(ptz))
+  # nage <- ifelse(!is.null(mn_length), length(mn_length), ncol(ptz))
   if(!is.null(ptz)) {
     age_sim <- NA*t
     for(i_t in 1:nstrata) {
@@ -359,7 +751,6 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
     length_sim <- NULL
   }
 
-  ### LEAVE IT OPEN FOR age_sim=NULL and length_sim=NULL
 
   # storing graphics state to save
   parmfrow <- par("mfrow")
@@ -383,7 +774,7 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
 
   # plotting population & one sample (optionally)
   if(plot_pop) {
-    if(prod(dim(table(t,age_sim))) > 1) {
+    if(prod(dim(table(t,age_sim))) > 1) {  #
       mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age", main="Population", col=grey.colors(nage, rev=TRUE))
       mosaicplot(table(t[thesample],age_sim[thesample]), xlab="Stratum", ylab="Age", main="Sample", col=grey.colors(nage, rev=TRUE))
     }
@@ -401,17 +792,25 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
     Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
   }
 
+  ### LEAVE IT OPEN FOR age_sim=NULL and length_sim=NULL
+  if(nage == 1) age_sim <- NULL
+  # if(nstrata == 1) t <- NULL
+
+  thestratum <- as.integer(t[thesample])
+  if(all(thestratum==1)) thestratum <- NULL
+
   thetable <- ASL_table(age=age_sim[thesample],
                         length=length_sim[thesample],
-                        stratum=as.integer(t[thesample]),
+                        stratum=thestratum,
                         Nhat=Nhat_sim,
-                        se_Nhat=se_Nt)  # find a way to add stratum_weights???
+                        se_Nhat=se_Nt,
+                        verbose=verbose)  # find a way to add stratum_weights???
 
   # initiate all stuff to store
   # results <- array(dim=c(nrow(thetable), ncol(thetable), nsim))
   results <- array(dim=c(nsim, nrow(thetable), ncol(thetable)))
 
-  # then loop nsim times!!!
+  ############### then loop nsim times!!! ###############
   for(i_sim in 1:nsim) {
     # first take a sample of fish
     thesample <- sample(seq_along(t)[t==1], size=nt[1])
@@ -429,7 +828,7 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
     }
     thetable <- ASL_table(age=age_sim[thesample],
                           length=length_sim[thesample],
-                          stratum=as.integer(t[thesample]),
+                          stratum=thestratum,
                           Nhat=Nhat_sim,
                           se_Nhat=se_Nt)  # find a way to add stratum_weights???
     # results[,,i_sim] <- as.matrix(thetable)
@@ -517,3 +916,28 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
 # verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=NULL, sd_length=NULL, ptz=1:5, Nt=10000, nt=100)  # pooled no error, just age
 # verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=300, sd_length=70, ptz=NULL, Nt=10000, nt=100)# pooled no error, just length
 
+# nsim <- 5000
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_witherror_lengthage", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_witherror_age", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_witherror_length", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_lengthage", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_age", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="stratified_length", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_witherror_lengthage", nsim=nsim, plot_pop = T)   # fails??
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_witherror_age", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_witherror_length", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_lengthage", nsim=nsim, plot_pop = T)
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_age", nsim=nsim, plot_pop = T)  # fails??  I think there are missing ages
+# par(mfrow=c(3,2))
+# verify_ASL_table(case="pooled_length", nsim=nsim, plot_pop = T)  # warnings again
