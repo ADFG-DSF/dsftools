@@ -312,33 +312,51 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
                                           c(2,5,3,2,1),
                                           c(5,4,3,1,1)),
                                           byrow=TRUE,
-                                          nrow=length(nt),
-                                          ncol=length(mn_length)),
+                                          nrow=4,
+                                          ncol=5),
                              nsim=1000,    # number of simulated replicates
                              plot_pop=TRUE) {   # whether to make summary plots of pop & one sample
 
   # check inputs: length(nt) vs length(Nt) vs. length(se_Nt) vs.....
   # check inputs: length(mn_length) vs length(sd_length) vs....
 
+  #### no age means mn_length and sd_length have length 1, and ptz will be NULL
+  #### no length means mn_length and sd_length will be NULL
+  #### no strata means nt and Nt will be length 1 and ptz will be a vector
+
   nstrata <- length(nt)
-  nage <- length(mn_length)
+
 
   ## constructing vectors at the POPULATION level
   # stratum
   t <- rep(1,Nt[1])
-  for(i in 2:length(Nt)) t <- c(t, rep(i, Nt[i]))
+  if(length(Nt) > 1) {
+    for(i in 2:length(Nt)) t <- c(t, rep(i, Nt[i]))
+  }
 
   # age
-  age_sim <- NA*t
-  for(i_t in 1:nstrata) {
-    age_sim[t==i_t] <- sample(x=1:nage, size=sum(t==i_t), prob=ptz[i_t,],replace=TRUE)
+  if(is.null(dim(ptz)) & !is.null(ptz)) {
+    ptz <- t(as.matrix(ptz))
   }
-  # age_sim[t==1] <- sample(x=1:5, size=sum(t==1), prob=c(1,2,3,4,5), replace=T)
+  nage <- ifelse(!is.null(mn_length), length(mn_length), ncol(ptz))
+  if(!is.null(ptz)) {
+    age_sim <- NA*t
+    for(i_t in 1:nstrata) {
+      age_sim[t==i_t] <- sample(x=1:nage, size=sum(t==i_t), prob=ptz[i_t,],replace=TRUE)
+    }
+    # age_sim[t==1] <- sample(x=1:5, size=sum(t==1), prob=c(1,2,3,4,5), replace=T)
+  } else {
+    age_sim <- rep(1, length(t))
+  }
 
   # length
-  length_sim <- NA*t
-  for(i_z in 1:nage) {
-    length_sim[age_sim==i_z] <- rnorm(sum(age_sim==i_z), mn_length[i_z], sd_length[i_z])
+  if(!is.null(mn_length)) {
+    length_sim <- NA*t
+    for(i_z in 1:nage) {
+      length_sim[age_sim==i_z] <- rnorm(sum(age_sim==i_z), mn_length[i_z], sd_length[i_z])
+    }
+  } else {
+    length_sim <- NULL
   }
 
   ### LEAVE IT OPEN FOR age_sim=NULL and length_sim=NULL
@@ -365,15 +383,24 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
 
   # plotting population & one sample (optionally)
   if(plot_pop) {
-    mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age", main="Population")
-    mosaicplot(table(t[thesample],age_sim[thesample]), xlab="Stratum", ylab="Age", main="Sample")
-    boxplot(length_sim~age_sim, xlab="Age", ylab="Length", main="Population")
-    boxplot(length_sim[thesample]~age_sim[thesample], xlab="Age", ylab="Length", main="Sample")
-    boxplot(length_sim~t, xlab="Stratum", ylab="Length", main="Population")
-    boxplot(length_sim[thesample]~t[thesample], xlab="Stratum", ylab="Length", main="Sample")
+    if(prod(dim(table(t,age_sim))) > 1) {
+      mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age", main="Population", col=grey.colors(nage, rev=TRUE))
+      mosaicplot(table(t[thesample],age_sim[thesample]), xlab="Stratum", ylab="Age", main="Sample", col=grey.colors(nage, rev=TRUE))
+    }
+    if(!is.null(length_sim)) {
+      boxplot(length_sim~age_sim, xlab="Age", ylab="Length", main="Population")
+      boxplot(length_sim[thesample]~age_sim[thesample], xlab="Age", ylab="Length", main="Sample")
+      boxplot(length_sim~t, xlab="Stratum", ylab="Length", main="Population")
+      boxplot(length_sim[thesample]~t[thesample], xlab="Stratum", ylab="Length", main="Sample")
+    }
   }
 
-  Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+  if(is.null(se_Nt)) {
+    Nhat_sim <- Nt
+  } else {
+    Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+  }
+
   thetable <- ASL_table(age=age_sim[thesample],
                         length=length_sim[thesample],
                         stratum=as.integer(t[thesample]),
@@ -381,7 +408,8 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
                         se_Nhat=se_Nt)  # find a way to add stratum_weights???
 
   # initiate all stuff to store
-  results <- array(dim=c(nrow(thetable), ncol(thetable), nsim))
+  # results <- array(dim=c(nrow(thetable), ncol(thetable), nsim))
+  results <- array(dim=c(nsim, nrow(thetable), ncol(thetable)))
 
   # then loop nsim times!!!
   for(i_sim in 1:nsim) {
@@ -394,23 +422,98 @@ verify_ASL_table <- function(nt = c(100, 100, 100, 100), # sample size for each 
     }
     # table(t[thesample])  # making sure it worked
 
-    Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+    if(is.null(se_Nt)) {
+      Nhat_sim <- Nt
+    } else {
+      Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
+    }
     thetable <- ASL_table(age=age_sim[thesample],
                           length=length_sim[thesample],
                           stratum=as.integer(t[thesample]),
                           Nhat=Nhat_sim,
                           se_Nhat=se_Nt)  # find a way to add stratum_weights???
-    results[,,i_sim] <- as.matrix(thetable)
+    # results[,,i_sim] <- as.matrix(thetable)
+    results[i_sim,,] <- as.matrix(thetable)
   }
-  dimnames(results)[1:2] <- dimnames(thetable)
+  # dimnames(results)[1:2] <- dimnames(thetable)
+  dimnames(results)[2:3] <- dimnames(thetable)
 
-  phat_sim <- results[,dimnames(results)[[2]]=="phat",]
-  phat_true <- as.numeric(table(age_sim)/sum(Nt))
-  boxplot(t(phat_sim), ylim=range(phat_true, phat_sim, na.rm=TRUE),
-          main="p_hat", xlab="Age",
-          border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
-  points(phat_true, col=2, pch=16)
-  legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
-         fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+  ### plotting simulation results, overlayed with true values
+  if("phat" %in% dimnames(results)[[3]]) {
+    phat_sim <- results[,,dimnames(results)[[3]]=="phat"]
+    phat_true <- as.numeric(table(age_sim)/sum(Nt))
+    boxplot(phat_sim, ylim=range(phat_true, phat_sim, na.rm=TRUE),
+            main="p_hat", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(phat_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
 
+    se_phat_sim <- results[,,dimnames(results)[[3]]=="se_phat"]
+    se_phat_true <- apply(phat_sim, 2, sd, na.rm=TRUE)
+    boxplot(se_phat_sim, ylim=range(se_phat_true, se_phat_sim, na.rm=TRUE),
+            main="se(p_hat)", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(se_phat_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+  }
+
+  if("Nhat" %in% dimnames(results)[[3]]) {
+    Nhat_sim <- results[,,dimnames(results)[[3]]=="Nhat"]
+    Nhat_true <- as.numeric(table(age_sim))
+    boxplot(Nhat_sim, ylim=range(Nhat_true, Nhat_sim, na.rm=TRUE),
+            main="N_hat", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(Nhat_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+
+    se_Nhat_sim <- results[,,dimnames(results)[[3]]=="se_Nhat"]
+    se_Nhat_true <- apply(Nhat_sim, 2, sd, na.rm=TRUE)
+    boxplot(se_Nhat_sim, ylim=range(se_Nhat_true, se_Nhat_sim, na.rm=TRUE),
+            main="se(N_hat)", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(se_Nhat_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+  }
+
+  if("mn_length" %in% dimnames(results)[[3]]) {
+    mn_length_sim <- as.matrix(results[,,dimnames(results)[[3]]=="mn_length"])
+    mn_length_true <- mn_length
+    boxplot(mn_length_sim, ylim=range(mn_length_true, mn_length_sim, na.rm=TRUE),
+            main="mn_length", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(mn_length_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+
+    se_mn_length_sim <- results[,,dimnames(results)[[3]]=="se_length"]
+    se_mn_length_true <- apply(mn_length_sim, 2, sd, na.rm=TRUE)
+    boxplot(se_mn_length_sim, ylim=range(se_mn_length_true, se_mn_length_sim, na.rm=TRUE),
+            main="se(mn_length)", xlab="Age",
+            border=adjustcolor(4,alpha.f=.6), col=adjustcolor(4,alpha.f=.2))
+    points(se_mn_length_true, col=2, pch=16)
+    legend("topright",legend=c("sim","true"),pch=c(NA,16),col=c(NA,2),
+           fill=c(adjustcolor(4,alpha.f=.2),NA),border=c(adjustcolor(4,alpha.f=.6),NA))
+  }
 }
+
+# par(mfrow=c(3,2))
+# verify_ASL_table(nsim=50, plot_pop = T)   # stratified with error, age and length
+# verify_ASL_table(nsim=50, plot_pop = T, mn_length=NULL, sd_length=NULL)   # stratified with error, just age
+# verify_ASL_table(nsim=50, plot_pop = T, mn_length=300, sd_length=70, ptz=NULL)# stratified with error, just length
+#
+# verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T)  # stratified, no error, age and length
+# verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=NULL, sd_length=NULL)   # stratified no error, just age
+# verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=300, sd_length=70, ptz=NULL)# stratified no error, just length
+#
+# verify_ASL_table(ptz=1:5, Nt=10000, nt=100, nsim=50, plot_pop = T)   # pooled with error, age and length
+# verify_ASL_table(nsim=50, plot_pop = T, mn_length=NULL, sd_length=NULL, ptz=1:5, Nt=10000, nt=100)  # pooled with error, just age
+# verify_ASL_table(nsim=50, plot_pop = T, mn_length=300, sd_length=70, ptz=NULL, Nt=10000, nt=100)# pooled with error, just length
+#
+# verify_ASL_table(se_Nt = NULL, ptz=1:5, Nt=10000, nt=100, nsim=50, plot_pop = T)   # pooled no error, age and length
+# verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=NULL, sd_length=NULL, ptz=1:5, Nt=10000, nt=100)  # pooled no error, just age
+# verify_ASL_table(se_Nt = NULL, nsim=50, plot_pop = T, mn_length=300, sd_length=70, ptz=NULL, Nt=10000, nt=100)# pooled no error, just length
+
