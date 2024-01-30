@@ -12,7 +12,8 @@ ASL_table(
   Nhat = NULL,
   se_Nhat = NULL,
   stratum_weights = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  FPC = NA
 )
 }
 \arguments{
@@ -46,6 +47,10 @@ underestimating variance.  Defaults to \code{NULL}.}
 
 \item{verbose}{Whether to print messages corresponding to the method used.
 Defaults to \code{FALSE}.}
+
+\item{FPC}{Whether to incorporate the Finite Population Correction factor in
+variance calculations.  If the default (\code{NA}) is accepted, the FPC will only be
+used if the abundance is considered to be known without error.}
 }
 \value{
 A data.frame with rows corresponding to categories of age and/or sex,
@@ -63,6 +68,37 @@ Here is text
 }
 \description{
 FILL IN DESCRIPTION HERE
+}
+\examples{
+### a look at input
+head(sim_data$data)
+sim_data$abundance
+
+### tables for possible scenarios
+
+# Stratified with error in Nhat
+ASL_table(age=sim_data$data$age,
+          length=sim_data$data$length,
+          stratum=sim_data$data$stratum,
+          Nhat=sim_data$abundance$Nhat,
+          se_Nhat=sim_data$abundance$se_Nhat)
+
+# Stratified without error in Nhat
+ASL_table(age=sim_data$data$age,
+          length=sim_data$data$length,
+          stratum=sim_data$data$stratum,
+          Nhat=sim_data$abundance$Nhat)
+
+# Pooled (not stratified) with error in Nhat
+ASL_table(age=sim_data$data$age,
+          length=sim_data$data$length,
+          Nhat=100*1000,
+          se_Nhat=10*1000)
+
+# Pooled (not stratified) without error in Nhat
+ASL_table(age=sim_data$data$age,
+          length=sim_data$data$length,
+          Nhat=100*1000)
 }
 \author{
 Matt Tyers
