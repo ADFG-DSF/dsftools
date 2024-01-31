@@ -94,7 +94,7 @@ nsim <- 5000
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
 "stratified_witherror_length", "stratified_lengthage", "stratified_age",
 "stratified_length", "pooled_witherror_lengthage", "pooled_witherror_age",
-"pooled_witherror_length" "pooled_lengthage", "pooled_age", "pooled_length")
+"pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length")
 for(case_i in cases) {
   par(mfrow=c(3,2))
   verify_ASL_table(case=case_i, nsim=5000)
