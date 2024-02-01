@@ -21,17 +21,18 @@ thesums <- NA
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
     for(i_known in 1:2) {
+      # print("=============================================")
       for(i_fpc in 1:3) {
         countup <- countup + 1
         if(i_which==1) {
           age <- sim_data$data$age
           length <- sim_data$data$length
         }
-        if(i_which==1) {
+        if(i_which==2) {
           age <- NULL
           length <- sim_data$data$length
         }
-        if(i_which==1) {
+        if(i_which==3) {
           age <- sim_data$data$age
           length <- NULL
         }
@@ -79,6 +80,9 @@ for(i_strat in 1:2) {
                         se_Nhat=se_Nhat,
                         FPC=FPC,
                         verbose=FALSE))
+        # if(abs(thesums[countup]-thecheck[countup])>0.01) {
+        #   print(c(i_strat,i_which,i_known,i_fpc))
+        # }
       }
     }
   }
@@ -90,17 +94,18 @@ for(i_strat in 1:2) {
 # FPC TRUE vs FALSE vs NA
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
+    # print("=============================================")
     for(i_fpc in 1:3) {
       countup <- countup + 1
       if(i_which==1) {
         age <- sim_data$data$age
         length <- sim_data$data$length
       }
-      if(i_which==1) {
+      if(i_which==2) {
         age <- NULL
         length <- sim_data$data$length
       }
-      if(i_which==1) {
+      if(i_which==3) {
         age <- sim_data$data$age
         length <- NULL
       }
@@ -141,20 +146,20 @@ for(i_strat in 1:2) {
 
 
 
-thecheck <- c(116386.0509, 116402.9466, 116386.0509, 121940.2906, 121951.3860, 121951.3860,
+thecheck <- c(120196.2650, 120213.2479, 120196.2650, 125756.9079, 125768.0804, 125768.0804,
+1203.3601,   1203.3670,   1203.3601,   1593.8774,   1593.8774,   1593.8774,
 116386.0509, 116402.9466, 116386.0509, 121940.2906, 121951.3860, 121951.3860,
-116386.0509, 116402.9466, 116386.0509, 121940.2906, 121951.3860, 121951.3860,
-116044.4955, 116064.0044, 116044.4955, 120775.2723, 120788.6541, 120788.6541,
-116044.4955, 116064.0044, 116044.4955, 120775.2723, 120788.6541, 120788.6541,
-116044.4955, 116064.0044, 116044.4955, 120775.2723, 120788.6541, 120788.6541,
-392.2044,    392.2044,    392.2044,    392.2044,    392.2044,    392.2044,
-392.2044,    392.2044,    392.2044,    396.0989,    396.0989,    396.0989,
-396.0989,    396.0989,    396.0989,    396.0989,    396.0989,    396.09897)
+120202.1631, 120221.7422, 120202.1631, 124946.3919, 124946.3919, 124946.3919,
+1614.9671,   1614.9754,   1614.9671,   1614.9754,   1614.9754,   1614.9754,
+116044.4955, 116064.0044, 116044.4955, 120788.6541, 120788.6541, 120788.6541,
+4201.4035,   4201.4035,   4201.4035,   1203.3670,   1203.3670,   1203.3670,
+391.1022,    391.1022,    391.1022,   4553.8367,   4553.8367,   4553.8367,
+1614.9754,   1614.9754,   1614.9754,    396.0989,    396.0989,    396.0989)
 
 # all(abs(thesums - thecheck) < 0.1)
 
 test_that("ASL_table", {
-  expect_true(all(abs(thesums - thecheck) < 0.1))
+  expect_true(all(abs(thesums - thecheck) < 0.001))
 })
 
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",

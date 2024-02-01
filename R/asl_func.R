@@ -1,5 +1,18 @@
 #' Construct an ASL Table from Vectors of Data
-#' @description FILL IN DESCRIPTION HERE
+#' @description This function is intended to perform all the necessary calculations
+#' to construct tables summarizing ASL (Age, Sex, and Length) for several data
+#' scenarios:
+#'
+#' * Stratified vs. non-stratified
+#' * Abundance known without error vs. estimated with error vs. unknown
+#' * Data available for Age, Sex, and Length vs. some subset.
+#'
+#' The function will return a table with rows for each combination of Age and
+#' Sex (as available), and will summarize the respective proportions, estimated
+#' abundance, and associated Lengths (as available).
+#'
+#' Generally, `NULL` values in a given data vector indicate that the vector will
+#' not be used.
 #'
 #' @param age Vector of ages.  If the default (`NULL`) is accepted, age will be
 #' omitted from the resulting table.
@@ -40,6 +53,7 @@
 #'
 #' Here is text
 #' @author Matt Tyers
+#' @seealso [verify_ASL_table]
 #' @examples
 #' ### a look at input
 #' head(sim_data$data)
@@ -70,6 +84,9 @@
 #' ASL_table(age=sim_data$data$age,
 #'           length=sim_data$data$length,
 #'           Nhat=100*1000)
+#' @importFrom grDevices adjustcolor grey.colors
+#' @importFrom graphics boxplot legend mosaicplot par points
+#' @importFrom stats rnorm sd var
 #' @export
 ASL_table <- function(age=NULL,
                       sex=NULL,
@@ -119,7 +136,7 @@ ASL_table <- function(age=NULL,
     if(is.null(se_Nhat)) {
       if(verbose) cat("\n", "without error in Nhat", "\n")
       if(is.na(FPC)) {
-        FPC <- !is.null(Nhat) & is.null(stratum_weights)
+        FPC <- !is.null(Nhat) #& is.null(stratum_weights)
       }
       if(is.null(Nhat) & !is.null(stratum_weights)) {
         Nt <- stratum_weights   # weights will be used instead of true abundance (ok because they are assumed proportional)
@@ -135,7 +152,7 @@ ASL_table <- function(age=NULL,
         ntz <- table(stratum, cats, useNA="no")
         nt <- rowSums(ntz)
         if(!FPC) {
-          FPC_vec <- rep(1, length(nt))  # this will ignore FPC in further calculations
+          FPC_vec <- 1#rep(1, length(nt))  # this will ignore FPC in further calculations
           if(verbose) cat("\n","Finite Population Correction factor NOT used","\n")
         } else {
           FPC_vec <- (Nt-nt)/(Nt-1)
@@ -151,8 +168,10 @@ ASL_table <- function(age=NULL,
         vpz <- vNz/(sum(Nt)^2)
         out$phat <- pz
         out$se_phat <- sqrt(vpz)
-        out$Nhat <- Nz
-        out$se_Nhat <- sqrt(vNz)
+        if(!is.null(Nhat)) {
+          out$Nhat <- Nz
+          out$se_Nhat <- sqrt(vNz)
+        }
 
         # summarizing length
         if(!is.null(length)) {
@@ -161,7 +180,7 @@ ASL_table <- function(age=NULL,
           if(FPC) {
             FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           } else {
-            FPC_vec2 <- rep(1, length(nt))
+            FPC_vec2 <- 1#rep(1, length(nt))
           }
           vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom * FPC_vec2
 
@@ -190,11 +209,14 @@ ASL_table <- function(age=NULL,
         nt <- table(stratum, is.na(length))[,1] # table(stratum)   ### now excludes NA values in length
         if(!FPC) {
           if(verbose) cat("\n","Finite Population Correction factor NOT used", "\n")
-          FPC_vec <- rep(1, length(nt))  # this will ignore FPC in further calculations
-          Nt <- stratum_weights   # weights will be used instead of true abundance (ok because they are assumed proportional)
+          FPC_vec <- 1#rep(1, length(nt))  # this will ignore FPC in further calculations
         } else {
           if(verbose) cat("\n","Finite Population Correction factor USED", "\n")
           FPC_vec <- (Nt-nt)/(Nt-1)
+        }
+        if(!is.null(stratum_weights)) {
+          Nt <- stratum_weights   # weights will be used instead of true abundance (ok because they are assumed proportional)
+        } else {
           Nt <- Nhat # consistency with report eqns
         }
         xbart <- tapply(length, stratum, mean, na.rm=TRUE)
@@ -224,13 +246,13 @@ ASL_table <- function(age=NULL,
           stop("Nhat must be supplied when se_Nhat is used.")
         } else {
           Nt <- Nhat # consistency with report eqns
-          FPC_vec <- (Nt-nt)/(Nt-1)
+          # FPC_vec <- (Nt-nt)/(Nt-1)
         }
         if(FPC) {
           FPC_vec <- (Nt-nt)/(Nt-1)
           if(verbose) cat("\n", "Finite Population Correction factor USED", "\n")
         } else {
-          FPC_vec <- rep(1, length(Nt))
+          FPC_vec <- 1#rep(1, length(Nt))
           if(verbose) cat("\n", "Finite Population Correction factor NOT used", "\n")
         }
         ptz <- ntz/nt
@@ -263,7 +285,7 @@ ASL_table <- function(age=NULL,
           if(FPC) {
             FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           } else {
-            FPC_vec2 <- rep(1, length(nt))
+            FPC_vec2 <- 1#rep(1, length(nt))
           }
           vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom * FPC_vec2
 
@@ -289,7 +311,7 @@ ASL_table <- function(age=NULL,
           FPC_vec <- (Nt-nt)/(Nt-1)
           if(verbose) cat("\n", "Finite Population Correction factor USED ------ except actually not", "\n")
         } else {
-          FPC_vec <- rep(1, length(Nt))
+          FPC_vec <- 1#rep(1, length(Nt))
           if(verbose) cat("\n", "Finite Population Correction factor NOT used", "\n")
         }
         Nt <- Nhat # consistency with report eqns
@@ -328,7 +350,7 @@ ASL_table <- function(age=NULL,
     if(is.na(FPC)) {
       FPC <- !is.null(Nhat) & is.null(se_Nhat)
     }
-    if(FPC & is.null(Nhat)) {
+    if(FPC & (is.null(Nhat) | !is.null(se_Nhat))) {
       FPC <- FALSE
     }
     if(FPC) {
@@ -466,6 +488,7 @@ ASL_table <- function(age=NULL,
 #' `ASL_table()`.  Defaults to `TRUE`.
 #' @return `NULL`
 #' @author Matt Tyers
+#' @seealso [ASL_table]
 #' @examples
 #' par(mfrow=c(2,2))
 #' verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)

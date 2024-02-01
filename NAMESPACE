@@ -2,3 +2,13 @@
 
 export(ASL_table)
 export(verify_ASL_table)
+importFrom(grDevices,adjustcolor)
+importFrom(grDevices,grey.colors)
+importFrom(graphics,boxplot)
+importFrom(graphics,legend)
+importFrom(graphics,mosaicplot)
+importFrom(graphics,par)
+importFrom(graphics,points)
+importFrom(stats,rnorm)
+importFrom(stats,sd)
+importFrom(stats,var)

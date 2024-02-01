@@ -101,6 +101,9 @@ for(case_i in cases) {
 }
 }
 }
+\seealso{
+\link{ASL_table}
+}
 \author{
 Matt Tyers
 }

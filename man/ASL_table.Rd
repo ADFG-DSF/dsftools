@@ -67,7 +67,21 @@ Here is text
 }
 }
 \description{
-FILL IN DESCRIPTION HERE
+This function is intended to perform all the necessary calculations
+to construct tables summarizing ASL (Age, Sex, and Length) for several data
+scenarios:
+\itemize{
+\item Stratified vs. non-stratified
+\item Abundance known without error vs. estimated with error vs. unknown
+\item Data available for Age, Sex, and Length vs. some subset.
+}
+
+The function will return a table with rows for each combination of Age and
+Sex (as available), and will summarize the respective proportions, estimated
+abundance, and associated Lengths (as available).
+
+Generally, \code{NULL} values in a given data vector indicate that the vector will
+not be used.
 }
 \examples{
 ### a look at input
@@ -99,6 +113,9 @@ ASL_table(age=sim_data$data$age,
 ASL_table(age=sim_data$data$age,
           length=sim_data$data$length,
           Nhat=100*1000)
+}
+\seealso{
+\link{verify_ASL_table}
 }
 \author{
 Matt Tyers
