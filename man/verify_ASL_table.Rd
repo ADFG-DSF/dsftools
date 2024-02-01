@@ -14,6 +14,7 @@ verify_ASL_table(
   mn_length = NULL,
   sd_length = NULL,
   ptz = NULL,
+  nNA = 10,
   nsim = 1000,
   plot_pop = TRUE,
   verbose = TRUE
@@ -50,6 +51,8 @@ for each row will be normalized before simulation, therefore summing to one
 is not required.  If a pooled (non-stratified) sample is to be taken and
 age categories are to be considered, this should be supplied as a vector with
 length equal to the number of ages.}
+
+\item{nNA}{Number of NA values to randomly impute, to test robustness to NA.  Defaults to \code{10}.}
 
 \item{nsim}{Number of simulated replicates.  Defaults to \code{1000}, but more is recommended.}
 

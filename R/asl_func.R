@@ -175,14 +175,14 @@ ASL_table <- function(age=NULL,
 
         # summarizing length
         if(!is.null(length)) {
-          xbartz <- tapply(length, list(stratum, cats), mean)
+          xbartz <- tapply(length, list(stratum, cats), mean, na.rm=TRUE)   ### this should have a na.rm=TRUE !!!
           vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
           if(FPC) {
             FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           } else {
             FPC_vec2 <- 1#rep(1, length(nt))
           }
-          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom * FPC_vec2
+          vxbartz <- tapply(length, list(stratum, cats), var, na.rm=TRUE)/vxbartz_denom * FPC_vec2
 
           Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
           xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=T)
@@ -221,6 +221,7 @@ ASL_table <- function(age=NULL,
         }
         xbart <- tapply(length, stratum, mean, na.rm=TRUE)
         vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
+        out$n_length <- sum(!is.na(length))
         out$mn_length <- sum(Nt*xbart/sum(Nt))
         out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart*FPC_vec))
         out$min_length <- min(length, na.rm=TRUE)
@@ -280,14 +281,14 @@ ASL_table <- function(age=NULL,
 
         # summarizing length
         if(!is.null(length)) {
-          xbartz <- tapply(length, list(stratum, cats), mean)
+          xbartz <- tapply(length, list(stratum, cats), mean, na.rm=TRUE)   ### this should have a na.rm=TRUE !!!
           vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
           if(FPC) {
             FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
           } else {
             FPC_vec2 <- 1#rep(1, length(nt))
           }
-          vxbartz <- tapply(length, list(stratum, cats), var)/vxbartz_denom * FPC_vec2
+          vxbartz <- tapply(length, list(stratum, cats), var, na.rm=TRUE)/vxbartz_denom * FPC_vec2
 
           Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
           xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=TRUE)
@@ -350,7 +351,7 @@ ASL_table <- function(age=NULL,
     if(is.na(FPC)) {
       FPC <- !is.null(Nhat) & is.null(se_Nhat)
     }
-    if(FPC & (is.null(Nhat) | !is.null(se_Nhat))) {
+    if(FPC & (is.null(Nhat) )) {  #WRONG  | !is.null(se_Nhat)
       FPC <- FALSE
     }
     if(FPC) {
@@ -479,6 +480,7 @@ ASL_table <- function(age=NULL,
 #' is not required.  If a pooled (non-stratified) sample is to be taken and
 #' age categories are to be considered, this should be supplied as a vector with
 #' length equal to the number of ages.
+#' @param nNA Number of NA values to randomly impute, to test robustness to NA.  Defaults to `10`.
 #' @param nsim Number of simulated replicates.  Defaults to `1000`, but more is recommended.
 #' @param plot_pop Whether to make summary plots of the simulated population and
 #' one representative sample, in addition to the plots produced in simulation.
@@ -521,6 +523,7 @@ verify_ASL_table <- function(case=NULL,   # should this default to NULL?
                                           # byrow=TRUE,
                                           # nrow=4,
                                           # ncol=5),
+                             nNA=10,
                              nsim=1000,   # 1000,    # number of simulated replicates
                              plot_pop=TRUE,   # whether to make summary plots of pop & one sample
                              verbose=TRUE) {  # whether to output cases in sim function
@@ -961,8 +964,22 @@ ptz = NULL
     } else {
       Nhat_sim <- rnorm(length(Nt), mean=Nt, sd=se_Nt) # could move this into function args
     }
-    thetable <- ASL_table(age=age_sim[thesample],
-                          length=length_sim[thesample],
+
+    thestratum <- as.integer(t[thesample])    #### this is new
+    if(all(thestratum==1)) thestratum <- NULL    #### this is new
+
+    theage <- age_sim[thesample]
+    thelength <- length_sim[thesample]
+
+
+    ## imputing some NA values to make sure the function is robust to NA!!
+    theage[sample(seq_along(theage), nNA)] <- NA
+    thelength[sample(seq_along(thelength), nNA)] <- NA
+    thestratum[sample(seq_along(thestratum), nNA)] <- NA
+
+
+    thetable <- ASL_table(age=theage,
+                          length=thelength,
                           stratum=thestratum,
                           Nhat=Nhat_sim,
                           se_Nhat=se_Nt)  # find a way to add stratum_weights???
