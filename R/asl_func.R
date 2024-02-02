@@ -457,7 +457,17 @@ ASL_table <- function(age=NULL,
 #' Twelve pre-determined cases may be used in the `case=` argument, depending on
 #' whether a stratified sampling scheme is used, whether abundance is known or
 #' estimated with error, and whether estimates pertaining to categorical (age)
-#' and/or numeric (length) values is to be performed.
+#' and/or numeric (length) values is to be performed.  In general:
+#' * Five age classes are simulated (if age is considered)
+#' * Mean and standard deviation of length increase with age (if length and age are considered)
+#' * Data are treated as belonging to four temporal strata (if stratified), in which:
+#'   - Age class generally decreases with stratum (older fish arrive sooner)
+#'   - Abundance and its standard error both increase with stratum (larger numbers of fish arrive later), but
+#'   - An equal number of fish are sampled per temporal stratum.
+#'
+#' It should be noted that a small but non-trival number of entries for age,
+#' length, and stratum are imputed as `NA` by default (see `nNA=` argument) in order
+#' to test function robustness to missing data.
 #' @param case If a pre-determined case is to be used.  Allowed values are
 #' `"stratified_witherror_lengthage"`, `"stratified_witherror_age"`, `"stratified_witherror_length"`,
 #' `"stratified_lengthage"`, `"stratified_age"`, `"stratified_length"`,
@@ -488,6 +498,8 @@ ASL_table <- function(age=NULL,
 #' @param verbose Whether to print the parameters used in simulation to the console,
 #' if one of the `case`s is accepted, as well as printing the method used within
 #' `ASL_table()`.  Defaults to `TRUE`.
+#' @param print_table Whether to print an example output table from `ASL_table()`
+#' as an additional check.  Defaults to `FALSE`.
 #' @return `NULL`
 #' @author Matt Tyers
 #' @seealso [ASL_table]
@@ -526,7 +538,8 @@ verify_ASL_table <- function(case=NULL,   # should this default to NULL?
                              nNA=10,
                              nsim=1000,   # 1000,    # number of simulated replicates
                              plot_pop=TRUE,   # whether to make summary plots of pop & one sample
-                             verbose=TRUE) {  # whether to output cases in sim function
+                             verbose=TRUE, # whether to output cases in sim function
+                             print_table=FALSE) {
 
   ### pre-populate cases
   if(!is.null(case)) {
@@ -890,9 +903,9 @@ ptz = NULL
   }
 
 
-  # storing graphics state to save
-  parmfrow <- par("mfrow")
-  on.exit(par(mfrow=parmfrow))  # making sure to re-set graphics state
+  # # storing graphics state to save
+  # parmfrow <- par("mfrow")
+  # on.exit(par(mfrow=parmfrow))  # making sure to re-set graphics state
 
   # # plotting simulated population
   # mosaicplot(table(t,age_sim), xlab="Stratum", ylab="Age")
@@ -937,12 +950,30 @@ ptz = NULL
   thestratum <- as.integer(t[thesample])
   if(all(thestratum==1)) thestratum <- NULL
 
-  thetable <- ASL_table(age=age_sim[thesample],
-                        length=length_sim[thesample],
+  theage <- age_sim[thesample]
+  thelength <- length_sim[thesample]
+
+
+  ## imputing some NA values to make sure the function is robust to NA!!
+  if(!is.null(theage)) theage[sample(seq_along(theage), nNA)] <- NA
+  if(!is.null(thelength)) thelength[sample(seq_along(thelength), nNA)] <- NA
+  if(!is.null(thestratum)) thestratum[sample(seq_along(thestratum), nNA)] <- NA
+
+
+  thetable <- ASL_table(age=theage,
+                        length=thelength,
                         stratum=thestratum,
                         Nhat=Nhat_sim,
                         se_Nhat=se_Nt,
-                        verbose=verbose)  # find a way to add stratum_weights???
+                        verbose=verbose)
+
+  # thetable <- ASL_table(age=age_sim[thesample],
+  #                       length=length_sim[thesample],
+  #                       stratum=thestratum,
+  #                       Nhat=Nhat_sim,
+  #                       se_Nhat=se_Nt,
+  #                       verbose=verbose)  # find a way to add stratum_weights???
+  if(print_table) print(thetable)
 
   # initiate all stuff to store
   # results <- array(dim=c(nrow(thetable), ncol(thetable), nsim))
@@ -973,9 +1004,9 @@ ptz = NULL
 
 
     ## imputing some NA values to make sure the function is robust to NA!!
-    theage[sample(seq_along(theage), nNA)] <- NA
-    thelength[sample(seq_along(thelength), nNA)] <- NA
-    thestratum[sample(seq_along(thestratum), nNA)] <- NA
+    if(!is.null(theage)) theage[sample(seq_along(theage), nNA)] <- NA
+    if(!is.null(thelength)) thelength[sample(seq_along(thelength), nNA)] <- NA
+    if(!is.null(thestratum)) thestratum[sample(seq_along(thestratum), nNA)] <- NA
 
 
     thetable <- ASL_table(age=theage,

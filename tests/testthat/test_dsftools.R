@@ -12,12 +12,12 @@ library(dsftools)
 #           se_Nhat=sim_data$abundance$se_Nhat, FPC=NA)
 
 # stratified vs pooled
-# error vs not
 # lengthage vs length vs age
+# error vs not
 # N known vs estimated
 # FPC TRUE vs FALSE vs NA
 countup <- 0
-thesums <- NA
+thelist <- list() # thesums <- NA
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
     for(i_known in 1:2) {
@@ -73,13 +73,21 @@ for(i_strat in 1:2) {
         #                 FPC=FPC,
         #                 verbose=TRUE))
 
-        thesums[countup] <- sum(ASL_table(age=age,
-                        length=length,
-                        stratum=stratum,
-                        Nhat=Nhat,
-                        se_Nhat=se_Nhat,
-                        FPC=FPC,
-                        verbose=FALSE))
+        # thesums[countup] <- sum(ASL_table(age=age,
+        #                                   length=length,
+        #                                   stratum=stratum,
+        #                                   Nhat=Nhat,
+        #                                   se_Nhat=se_Nhat,
+        #                                   FPC=FPC,
+        #                                   verbose=FALSE))
+
+        thelist[[countup]] <- ASL_table(age=age,
+                                          length=length,
+                                          stratum=stratum,
+                                          Nhat=Nhat,
+                                          se_Nhat=se_Nhat,
+                                          FPC=FPC,
+                                          verbose=FALSE)
         # if(abs(thesums[countup]-thecheck[countup])>0.01) {
         #   print(c(i_strat,i_which,i_known,i_fpc))
         # }
@@ -90,7 +98,6 @@ for(i_strat in 1:2) {
 
 # stratified with weights vs pooled and no Nhat given
 # lengthage vs length vs age
-# stratum_weights, no Nhat given
 # FPC TRUE vs FALSE vs NA
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
@@ -133,20 +140,38 @@ for(i_strat in 1:2) {
       #                 FPC=FPC,
       #                 verbose=TRUE))
 
-      thesums[countup] <- sum(ASL_table(age=age,
+      # thesums[countup] <- sum(ASL_table(age=age,
+      #                                   length=length,
+      #                                   stratum=stratum,
+      #                                   stratum_weights = stratum_weights,
+      #                                   Nhat=Nhat,
+      #                                   FPC=FPC,
+      #                                   verbose=FALSE))
+
+      thelist[[countup]] <- ASL_table(age=age,
                                         length=length,
                                         stratum=stratum,
                                         stratum_weights = stratum_weights,
                                         Nhat=Nhat,
                                         FPC=FPC,
-                                        verbose=FALSE))
+                                        verbose=FALSE)
     }
   }
 }
 
+therows <- sapply(thelist, nrow)
+thecols <- sapply(thelist, ncol)
+thesums <- sapply(thelist, sum)
 
+rows_check <- c(5, 5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 1, 5, 5,
+                5, 5, 5, 5, 1, 1, 1, 5, 5, 5)
+cols_check <- c(10, 10, 10, 10, 10, 10,  6,  6,  6,  6,  6,  6,  5,  5,  5,  5,
+                5,  5, 10, 10, 10, 10, 10, 10, 6,  6,  6,  6,  6,  6,  5,  5,  5,
+                5,  5, 5,  8,  8,  8,  6,  6,  6,  3,  3,  3,  8,  8,  8, 6,  6,
+                6,  3,  3,  3)
 
-thecheck <- c(120558.3029, 120575.2692, 120558.3029, 126112.8508, 126124.0163, 126124.0163,
+sums_check <- c(120558.3029, 120575.2692, 120558.3029, 126112.8508, 126124.0163, 126124.0163,
 1593.3601,   1593.3670,   1593.3601,   1593.8774,   1593.8774,   1593.8774,
 116386.0509, 116402.9466, 116386.0509, 121940.2906, 121951.3860, 121951.3860,
 120202.1631, 120221.7422, 120202.1631, 124932.9399, 124946.3919, 124946.3919,
@@ -159,7 +184,9 @@ thecheck <- c(120558.3029, 120575.2692, 120558.3029, 126112.8508, 126124.0163, 1
 # all(abs(thesums - thecheck) < 0.1)
 
 test_that("ASL_table", {
-  expect_true(all(abs(thesums - thecheck) < 0.001))
+  expect_true(all(therows == rows_check))
+  expect_true(all(thecols == cols_check))
+  expect_true(all(abs(thesums - sums_check) < 0.001))
 })
 
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
@@ -171,3 +198,7 @@ test_that("verify_ASL_table", {
     expect_silent(verify_ASL_table(case=case_i, nsim=10, verbose=FALSE))
   }
 })
+
+# for(case_i in cases) {
+#   verify_ASL_table(case=case_i, nsim=10, verbose=FALSE)
+# }

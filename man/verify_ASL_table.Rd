@@ -17,7 +17,8 @@ verify_ASL_table(
   nNA = 10,
   nsim = 1000,
   plot_pop = TRUE,
-  verbose = TRUE
+  verbose = TRUE,
+  print_table = FALSE
 )
 }
 \arguments{
@@ -63,6 +64,9 @@ Defaults to \code{TRUE}.}
 \item{verbose}{Whether to print the parameters used in simulation to the console,
 if one of the \code{case}s is accepted, as well as printing the method used within
 \code{ASL_table()}.  Defaults to \code{TRUE}.}
+
+\item{print_table}{Whether to print an example output table from \code{ASL_table()}
+as an additional check.  Defaults to \code{FALSE}.}
 }
 \value{
 \code{NULL}
@@ -85,7 +89,21 @@ that are identified should indicate a bug or incorrect derivation!
 Twelve pre-determined cases may be used in the \verb{case=} argument, depending on
 whether a stratified sampling scheme is used, whether abundance is known or
 estimated with error, and whether estimates pertaining to categorical (age)
-and/or numeric (length) values is to be performed.
+and/or numeric (length) values is to be performed.  In general:
+\itemize{
+\item Five age classes are simulated (if age is considered)
+\item Mean and standard deviation of length increase with age (if length and age are considered)
+\item Data are treated as belonging to four temporal strata (if stratified), in which:
+\itemize{
+\item Age class generally decreases with stratum (older fish arrive sooner)
+\item Abundance and its standard error both increase with stratum (larger numbers of fish arrive later), but
+\item An equal number of fish are sampled per temporal stratum.
+}
+}
+
+It should be noted that a small but non-trival number of entries for age,
+length, and stratum are imputed as \code{NA} by default (see \verb{nNA=} argument) in order
+to test function robustness to missing data.
 }
 \examples{
 par(mfrow=c(2,2))
