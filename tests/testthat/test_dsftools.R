@@ -13,11 +13,16 @@ library(dsftools)
 
 # stratified vs pooled
 # lengthage vs length vs age
-# error vs not
 # N known vs estimated
 # FPC TRUE vs FALSE vs NA
 countup <- 0
 thelist <- list() # thesums <- NA
+phat_arr <- se_phat_arr <- Nhat_arr <- se_Nhat_arr <- xbar_arr <- se_xbar_arr <-
+  array(dim=c(2,3,2,3),
+  dimnames=list(c("stratified","pooled"),
+               c("lengthage","length","age"),
+               c("N known","N estimated"),
+               c("FPC", "no FPC","FPC NA")))
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
     for(i_known in 1:2) {
@@ -91,14 +96,118 @@ for(i_strat in 1:2) {
         # if(abs(thesums[countup]-thecheck[countup])>0.01) {
         #   print(c(i_strat,i_which,i_known,i_fpc))
         # }
+        # phat_mn <- suppressWarnings(mean(thelist[[countup]]$phat))
+        phat_mn <- suppressWarnings(thelist[[countup]]$phat[1])
+        if(!is.null(phat_mn)) {
+          phat_arr[i_strat,i_which,i_known,i_fpc] <- phat_mn
+        }
+        # se_phat_mn <- suppressWarnings(mean(thelist[[countup]]$se_phat))
+        se_phat_mn <- suppressWarnings(thelist[[countup]]$se_phat[1])
+        if(!is.null(se_phat_mn)) {
+          se_phat_arr[i_strat,i_which,i_known,i_fpc] <- se_phat_mn
+        }
+        # Nhat_mn <- suppressWarnings(mean(thelist[[countup]]$Nhat))
+        Nhat_mn <- suppressWarnings(thelist[[countup]]$Nhat[1])
+        if(!is.null(Nhat_mn)) {
+          Nhat_arr[i_strat,i_which,i_known,i_fpc] <- Nhat_mn
+        }
+        # se_Nhat_mn <- suppressWarnings(mean(thelist[[countup]]$se_Nhat))
+        se_Nhat_mn <- suppressWarnings(thelist[[countup]]$se_Nhat[1])
+        if(!is.null(se_Nhat_mn)) {
+          se_Nhat_arr[i_strat,i_which,i_known,i_fpc] <- se_Nhat_mn
+        }
+        # xbar_mn <- suppressWarnings(mean(thelist[[countup]]$mn_length))
+        xbar_mn <- suppressWarnings(thelist[[countup]]$mn_length[1])
+        if(!is.null(xbar_mn)) {
+          xbar_arr[i_strat,i_which,i_known,i_fpc] <- xbar_mn
+        }
+        # se_xbar_mn <- suppressWarnings(mean(thelist[[countup]]$se_mn_length))
+        se_xbar_mn <- suppressWarnings(thelist[[countup]]$se_length[1])
+        if(!is.null(se_xbar_mn)) {
+          se_xbar_arr[i_strat,i_which,i_known,i_fpc] <- se_xbar_mn
+        }
       }
     }
   }
 }
+# phat_arr[,1,,]
+# phat_arr[,2,,]
+# phat_arr[,3,,]
+# se_phat_arr[,1,,]
+# se_phat_arr[,2,,]
+# se_phat_arr[,3,,]
+#
+# Nhat_arr[,1,,]
+# Nhat_arr[,2,,]
+# Nhat_arr[,3,,]
+# se_Nhat_arr[,1,,]
+# se_Nhat_arr[,2,,]
+# se_Nhat_arr[,3,,]
+#
+# xbar_arr[,1,,]
+# xbar_arr[,2,,]
+# xbar_arr[,3,,]
+# se_xbar_arr[,1,,]
+# se_xbar_arr[,2,,]
+# se_xbar_arr[,3,,]
+
+# all(phat_arr[,1,1,] == phat_arr[,1,2,])  # N known same as N estimated
+# all(phat_arr[,3,1,] == phat_arr[,3,2,])  # N known same as N estimated
+# all(is.na(phat_arr[,2,,]))  # not estimated when no proportions
+# all(phat_arr[,1,,1]==phat_arr[,1,,2] & phat_arr[,1,,3]==phat_arr[,1,,2]) # not affected by FPC
+# all(phat_arr[,3,,1]==phat_arr[,3,,2] & phat_arr[,3,,3]==phat_arr[,3,,2]) # not affected by FPC
+#
+# all(se_phat_arr[1,1,1,] < se_phat_arr[1,1,2,])  # SE less when N known
+# all(se_phat_arr[1,3,1,] < se_phat_arr[1,3,2,])
+# all(se_phat_arr[2,1,1,1:2] == se_phat_arr[2,1,2,1:2])  # estimated N does not affect
+# all(se_phat_arr[2,3,1,1:2] == se_phat_arr[2,3,2,1:2])
+# all(se_phat_arr[1,1,,] > se_phat_arr[2,1,,])  # SE more when stratified
+# all(se_phat_arr[1,3,,] > se_phat_arr[2,3,,])
+# all(is.na(se_phat_arr[,2,,]))  # not estimated when no proportions
+# all(se_phat_arr[,1,,1] < se_phat_arr[,1,,2])  # se less with fpc
+# all(se_phat_arr[,3,,1] < se_phat_arr[,3,,2])  # se less with fpc
+#
+# all(Nhat_arr[,1,1,] == Nhat_arr[,1,2,])  # N known same as N estimated
+# all(Nhat_arr[,3,1,] == Nhat_arr[,3,2,])  # N known same as N estimated
+# all(is.na(Nhat_arr[,2,,]))  # not estimated when no proportions
+# all(Nhat_arr[,1,,1]==Nhat_arr[,1,,2] & Nhat_arr[,1,,3]==Nhat_arr[,1,,2]) # not affected by FPC
+# all(Nhat_arr[,3,,1]==Nhat_arr[,3,,2] & Nhat_arr[,3,,3]==Nhat_arr[,3,,2]) # not affected by FPC
+#
+# all(se_Nhat_arr[1,1,1,] < se_Nhat_arr[1,1,2,])  # SE less when N known
+# all(se_Nhat_arr[1,3,1,] < se_Nhat_arr[1,3,2,])
+# all(se_Nhat_arr[2,1,1,1:2] < se_Nhat_arr[2,1,2,1:2])  # less when N is known
+# all(se_Nhat_arr[2,3,1,1:2] < se_Nhat_arr[2,3,2,1:2])
+# all(se_Nhat_arr[1,1,,] > se_Nhat_arr[2,1,,])  # SE more when stratified
+# all(se_Nhat_arr[1,3,,] > se_Nhat_arr[2,3,,])
+# all(is.na(se_Nhat_arr[,2,,]))  # not estimated when no proportions
+# all(se_Nhat_arr[,1,,1] < se_Nhat_arr[,1,,2])  # se less with fpc
+# all(se_Nhat_arr[,3,,1] < se_Nhat_arr[,3,,2])  # se less with fpc
+#
+# all(xbar_arr[,1,1,] == xbar_arr[,1,2,])  # N known same as N estimated
+# all(xbar_arr[,2,1,] == xbar_arr[,2,2,])  # N known same as N estimated
+# all(is.na(xbar_arr[,3,,]))  # not estimated when no lengths
+# all(xbar_arr[,1,,1]==xbar_arr[,1,,2] & xbar_arr[,1,,3]==xbar_arr[,1,,2]) # not affected by FPC
+# all(xbar_arr[,2,,1]==xbar_arr[,2,,2] & xbar_arr[,2,,3]==xbar_arr[,2,,2]) # not affected by FPC
+#
+# all(se_xbar_arr[1,1,1,] < se_xbar_arr[1,1,2,])  # SE less when N known
+# all(se_xbar_arr[1,2,1,] < se_xbar_arr[1,2,2,])
+# all(se_xbar_arr[2,1,1,1:2] == se_xbar_arr[2,1,2,1:2])  # estimated N does not affect
+# all(se_xbar_arr[2,2,1,1:2] == se_xbar_arr[2,2,2,1:2])
+# all(se_xbar_arr[1,1,,] > se_xbar_arr[2,1,,])  # SE more when stratified
+# all(se_xbar_arr[1,2,,] > se_xbar_arr[2,2,,])
+# all(is.na(se_xbar_arr[,3,,]))  # not estimated when no proportions
+# all(se_xbar_arr[,1,,1] < se_xbar_arr[,1,,2])  # se less with fpc
+# all(se_xbar_arr[,2,1,1] < se_xbar_arr[,2,1,2])  # se less with fpc (subset)
+
 
 # stratified with weights vs pooled and no Nhat given
 # lengthage vs length vs age
 # FPC TRUE vs FALSE vs NA
+phat_arr1 <- se_phat_arr1 <- Nhat_arr1 <- se_Nhat_arr1 <- xbar_arr1 <- se_xbar_arr1 <-
+  array(dim=c(2,3,3),
+        dimnames=list(c("stratWts","pooled_noNhat"),
+                      c("lengthage","length","age"),
+                      c("FPC", "no FPC","FPC NA")))
 for(i_strat in 1:2) {
   for(i_which in 1:3) {
     # print("=============================================")
@@ -155,9 +264,112 @@ for(i_strat in 1:2) {
                                         Nhat=Nhat,
                                         FPC=FPC,
                                         verbose=FALSE)
+
+      phat_mn <- suppressWarnings(thelist[[countup]]$phat[1])
+      if(!is.null(phat_mn)) {
+        phat_arr1[i_strat,i_which,i_fpc] <- phat_mn
+      }
+      # se_phat_mn <- suppressWarnings(mean(thelist[[countup]]$se_phat))
+      se_phat_mn <- suppressWarnings(thelist[[countup]]$se_phat[1])
+      if(!is.null(se_phat_mn)) {
+        se_phat_arr1[i_strat,i_which,i_fpc] <- se_phat_mn
+      }
+      # Nhat_mn <- suppressWarnings(mean(thelist[[countup]]$Nhat))
+      Nhat_mn <- suppressWarnings(thelist[[countup]]$Nhat[1])
+      if(!is.null(Nhat_mn)) {
+        Nhat_arr1[i_strat,i_which,i_fpc] <- Nhat_mn
+      }
+      # se_Nhat_mn <- suppressWarnings(mean(thelist[[countup]]$se_Nhat))
+      se_Nhat_mn <- suppressWarnings(thelist[[countup]]$se_Nhat[1])
+      if(!is.null(se_Nhat_mn)) {
+        se_Nhat_arr1[i_strat,i_which,i_fpc] <- se_Nhat_mn
+      }
+      # xbar_mn <- suppressWarnings(mean(thelist[[countup]]$mn_length))
+      xbar_mn <- suppressWarnings(thelist[[countup]]$mn_length[1])
+      if(!is.null(xbar_mn)) {
+        xbar_arr1[i_strat,i_which,i_fpc] <- xbar_mn
+      }
+      # se_xbar_mn <- suppressWarnings(mean(thelist[[countup]]$se_mn_length))
+      se_xbar_mn <- suppressWarnings(thelist[[countup]]$se_length[1])
+      if(!is.null(se_xbar_mn)) {
+        se_xbar_arr1[i_strat,i_which,i_fpc] <- se_xbar_mn
+      }
     }
   }
 }
+
+# phat_arr1[,1,]
+# phat_arr1[,2,]
+# phat_arr1[,3,]
+# se_phat_arr1[,1,]
+# se_phat_arr1[,2,]
+# se_phat_arr1[,3,]
+#
+# Nhat_arr1[,1,]
+# Nhat_arr1[,2,]
+# Nhat_arr1[,3,]
+# se_Nhat_arr1[,1,]
+# se_Nhat_arr1[,2,]
+# se_Nhat_arr1[,3,]
+#
+# xbar_arr1[,1,]
+# xbar_arr1[,2,]
+# xbar_arr1[,3,]
+# se_xbar_arr1[,1,]
+# se_xbar_arr1[,2,]
+# se_xbar_arr1[,3,]
+
+# all(phat_arr1[,1,1,] == phat_arr1[,1,2,])  # N known same as N estimated
+# all(phat_arr1[,3,1,] == phat_arr1[,3,2,])  # N known same as N estimated
+all(is.na(phat_arr1[,2,]))  # not estimated when no proportions
+all(phat_arr1[,1,1]==phat_arr1[,1,2] & phat_arr1[,1,3]==phat_arr1[,1,2]) # not affected by FPC
+all(phat_arr1[,3,1]==phat_arr1[,3,2] & phat_arr1[,3,3]==phat_arr1[,3,2]) # not affected by FPC
+
+# all(se_phat_arr1[1,1,1,] < se_phat_arr1[1,1,2,])  # SE less when N known
+# all(se_phat_arr1[1,3,1,] < se_phat_arr1[1,3,2,])
+# all(se_phat_arr1[2,1,1,1:2] == se_phat_arr1[2,1,2,1:2])  # estimated N does not affect
+# all(se_phat_arr1[2,3,1,1:2] == se_phat_arr1[2,3,2,1:2])
+all(se_phat_arr1[1,1,] > se_phat_arr1[2,1,])  # SE more when stratified
+all(se_phat_arr1[1,3,] > se_phat_arr1[2,3,])
+all(is.na(se_phat_arr1[,2,]))  # not estimated when no proportions
+# all(se_phat_arr1[,1,1] < se_phat_arr1[,1,2])  # se less with fpc
+# all(se_phat_arr1[,3,1] < se_phat_arr1[,3,2])  # se less with fpc
+
+# all(Nhat_arr1[,1,1,] == Nhat_arr1[,1,2,])  # N known same as N estimated
+# all(Nhat_arr1[,3,1,] == Nhat_arr1[,3,2,])  # N known same as N estimated
+# all(is.na(Nhat_arr1[,2,,]))  # not estimated when no proportions
+# all(Nhat_arr1[,1,,1]==Nhat_arr1[,1,,2] & Nhat_arr1[,1,,3]==Nhat_arr1[,1,,2]) # not affected by FPC
+# all(Nhat_arr1[,3,,1]==Nhat_arr1[,3,,2] & Nhat_arr1[,3,,3]==Nhat_arr1[,3,,2]) # not affected by FPC
+#
+# all(se_Nhat_arr1[1,1,1,] < se_Nhat_arr1[1,1,2,])  # SE less when N known
+# all(se_Nhat_arr1[1,3,1,] < se_Nhat_arr1[1,3,2,])
+# all(se_Nhat_arr1[2,1,1,1:2] < se_Nhat_arr1[2,1,2,1:2])  # less when N is known
+# all(se_Nhat_arr1[2,3,1,1:2] < se_Nhat_arr1[2,3,2,1:2])
+# all(se_Nhat_arr1[1,1,,] > se_Nhat_arr1[2,1,,])  # SE more when stratified
+# all(se_Nhat_arr1[1,3,,] > se_Nhat_arr1[2,3,,])
+# all(is.na(se_Nhat_arr1[,2,,]))  # not estimated when no proportions
+# all(se_Nhat_arr1[,1,,1] < se_Nhat_arr1[,1,,2])  # se less with fpc
+# all(se_Nhat_arr1[,3,,1] < se_Nhat_arr1[,3,,2])  # se less with fpc
+
+# all(xbar_arr1[,1,1,] == xbar_arr1[,1,2,])  # N known same as N estimated
+# all(xbar_arr1[,2,1,] == xbar_arr1[,2,2,])  # N known same as N estimated
+all(is.na(xbar_arr1[,3,]))  # not estimated when no lengths
+all(xbar_arr1[,1,1]==xbar_arr1[,1,2] & xbar_arr1[,1,3]==xbar_arr1[,1,2]) # not affected by FPC
+all(xbar_arr1[,2,1]==xbar_arr1[,2,2] & xbar_arr1[,2,3]==xbar_arr1[,2,2]) # not affected by FPC
+
+# all(se_xbar_arr1[1,1,1,] < se_xbar_arr1[1,1,2,])  # SE less when N known
+# all(se_xbar_arr1[1,2,1,] < se_xbar_arr1[1,2,2,])
+# all(se_xbar_arr1[2,1,1,1:2] == se_xbar_arr1[2,1,2,1:2])  # estimated N does not affect
+# all(se_xbar_arr1[2,2,1,1:2] == se_xbar_arr1[2,2,2,1:2])
+all(se_xbar_arr1[1,1,] > se_xbar_arr1[2,1,])  # SE more when stratified
+all(se_xbar_arr1[1,2,] > se_xbar_arr1[2,2,])
+all(is.na(se_xbar_arr1[,3,]))  # not estimated when no proportions
+# all(se_xbar_arr1[,1,1] < se_xbar_arr1[,1,2])  # se less with fpc
+# all(se_xbar_arr1[,2,1,1] < se_xbar_arr1[,2,1,2])  # se less with fpc (subset)
+
+
+
+
 
 therows <- sapply(thelist, nrow)
 thecols <- sapply(thelist, ncol)
@@ -184,6 +396,70 @@ sums_check <- c(120558.3029, 120575.2692, 120558.3029, 126112.8508, 126124.0163,
 # all(abs(thesums - thecheck) < 0.1)
 
 test_that("ASL_table", {
+  expect_true(all(phat_arr[,1,1,] == phat_arr[,1,2,]))  # N known same as N estimated
+  expect_true(all(phat_arr[,3,1,] == phat_arr[,3,2,]))  # N known same as N estimated
+  expect_true(all(is.na(phat_arr[,2,,])))  # not estimated when no proportions
+  expect_true(all(phat_arr[,1,,1]==phat_arr[,1,,2] & phat_arr[,1,,3]==phat_arr[,1,,2])) # not affected by FPC
+  expect_true(all(phat_arr[,3,,1]==phat_arr[,3,,2] & phat_arr[,3,,3]==phat_arr[,3,,2])) # not affected by FPC
+
+  expect_true(all(se_phat_arr[1,1,1,] < se_phat_arr[1,1,2,]))  # SE less when N known
+  expect_true(all(se_phat_arr[1,3,1,] < se_phat_arr[1,3,2,]))
+  expect_true(all(se_phat_arr[2,1,1,1:2] == se_phat_arr[2,1,2,1:2]))  # estimated N does not affect
+  expect_true(all(se_phat_arr[2,3,1,1:2] == se_phat_arr[2,3,2,1:2]))
+  expect_true(all(se_phat_arr[1,1,,] > se_phat_arr[2,1,,]))  # SE more when stratified
+  expect_true(all(se_phat_arr[1,3,,] > se_phat_arr[2,3,,]))
+  expect_true(all(is.na(se_phat_arr[,2,,])))  # not estimated when no proportions
+  expect_true(all(se_phat_arr[,1,,1] < se_phat_arr[,1,,2]))  # se less with fpc
+  expect_true(all(se_phat_arr[,3,,1] < se_phat_arr[,3,,2]))  # se less with fpc
+
+  expect_true(all(Nhat_arr[,1,1,] == Nhat_arr[,1,2,]))  # N known same as N estimated
+  expect_true(all(Nhat_arr[,3,1,] == Nhat_arr[,3,2,]))  # N known same as N estimated
+  expect_true(all(is.na(Nhat_arr[,2,,])))  # not estimated when no proportions
+  expect_true(all(Nhat_arr[,1,,1]==Nhat_arr[,1,,2] & Nhat_arr[,1,,3]==Nhat_arr[,1,,2])) # not affected by FPC
+  expect_true(all(Nhat_arr[,3,,1]==Nhat_arr[,3,,2] & Nhat_arr[,3,,3]==Nhat_arr[,3,,2])) # not affected by FPC
+
+  expect_true(all(se_Nhat_arr[1,1,1,] < se_Nhat_arr[1,1,2,]))  # SE less when N known
+  expect_true(all(se_Nhat_arr[1,3,1,] < se_Nhat_arr[1,3,2,]))
+  expect_true(all(se_Nhat_arr[2,1,1,1:2] < se_Nhat_arr[2,1,2,1:2]))  # less when N is known
+  expect_true(all(se_Nhat_arr[2,3,1,1:2] < se_Nhat_arr[2,3,2,1:2]))
+  expect_true(all(se_Nhat_arr[1,1,,] > se_Nhat_arr[2,1,,]))  # SE more when stratified
+  expect_true(all(se_Nhat_arr[1,3,,] > se_Nhat_arr[2,3,,]))
+  expect_true(all(is.na(se_Nhat_arr[,2,,])))  # not estimated when no proportions
+  expect_true(all(se_Nhat_arr[,1,,1] < se_Nhat_arr[,1,,2]))  # se less with fpc
+  expect_true(all(se_Nhat_arr[,3,,1] < se_Nhat_arr[,3,,2]))  # se less with fpc
+
+  expect_true(all(xbar_arr[,1,1,] == xbar_arr[,1,2,]))  # N known same as N estimated
+  expect_true(all(xbar_arr[,2,1,] == xbar_arr[,2,2,]))  # N known same as N estimated
+  expect_true(all(is.na(xbar_arr[,3,,])))  # not estimated when no lengths
+  expect_true(all(xbar_arr[,1,,1]==xbar_arr[,1,,2] & xbar_arr[,1,,3]==xbar_arr[,1,,2])) # not affected by FPC
+  expect_true(all(xbar_arr[,2,,1]==xbar_arr[,2,,2] & xbar_arr[,2,,3]==xbar_arr[,2,,2])) # not affected by FPC
+
+  expect_true(all(se_xbar_arr[1,1,1,] < se_xbar_arr[1,1,2,]))  # SE less when N known
+  expect_true(all(se_xbar_arr[1,2,1,] < se_xbar_arr[1,2,2,]))
+  expect_true(all(se_xbar_arr[2,1,1,1:2] == se_xbar_arr[2,1,2,1:2]))  # estimated N does not affect
+  expect_true(all(se_xbar_arr[2,2,1,1:2] == se_xbar_arr[2,2,2,1:2]))
+  expect_true(all(se_xbar_arr[1,1,,] > se_xbar_arr[2,1,,]))  # SE more when stratified
+  expect_true(all(se_xbar_arr[1,2,,] > se_xbar_arr[2,2,,]))
+  expect_true(all(is.na(se_xbar_arr[,3,,])))  # not estimated when no proportions
+  expect_true(all(se_xbar_arr[,1,,1] < se_xbar_arr[,1,,2]))  # se less with fpc
+  expect_true(all(se_xbar_arr[,2,1,1] < se_xbar_arr[,2,1,2]))  # se less with fpc (subset)
+
+  expect_true(all(is.na(phat_arr1[,2,])))  # not estimated when no proportions
+  expect_true(all(phat_arr1[,1,1]==phat_arr1[,1,2] & phat_arr1[,1,3]==phat_arr1[,1,2])) # not affected by FPC
+  expect_true(all(phat_arr1[,3,1]==phat_arr1[,3,2] & phat_arr1[,3,3]==phat_arr1[,3,2])) # not affected by FPC
+
+  expect_true(all(se_phat_arr1[1,1,] > se_phat_arr1[2,1,]))  # SE more when stratified
+  expect_true(all(se_phat_arr1[1,3,] > se_phat_arr1[2,3,]))
+  expect_true(all(is.na(se_phat_arr1[,2,])))  # not estimated when no proportions
+
+  expect_true(all(is.na(xbar_arr1[,3,])))  # not estimated when no lengths
+  expect_true(all(xbar_arr1[,1,1]==xbar_arr1[,1,2] & xbar_arr1[,1,3]==xbar_arr1[,1,2])) # not affected by FPC
+  expect_true(all(xbar_arr1[,2,1]==xbar_arr1[,2,2] & xbar_arr1[,2,3]==xbar_arr1[,2,2])) # not affected by FPC
+
+  expect_true(all(se_xbar_arr1[1,1,] > se_xbar_arr1[2,1,]))  # SE more when stratified
+  expect_true(all(se_xbar_arr1[1,2,] > se_xbar_arr1[2,2,]))
+  expect_true(all(is.na(se_xbar_arr1[,3,])))  # not estimated when no proportions
+
   expect_true(all(therows == rows_check))
   expect_true(all(thecols == cols_check))
   expect_true(all(abs(thesums - sums_check) < 0.001))
