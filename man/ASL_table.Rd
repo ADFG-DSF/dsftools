@@ -56,14 +56,25 @@ used if the abundance is considered to be known without error.}
 A data.frame with rows corresponding to categories of age and/or sex,
 depending on data inputs.
 \subsection{Stratified}{
+\subsection{Without error in Nhat}{
+\subsection{If there are proportions}{
 
-Here is an equation
+The proportion of each age and/or sex category will be estimated by sampling stratum (period) as follows:
 
-\deqn{
-\hat{p}_{tz}=\frac{n_{tz}}{n_t}
+\eqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
+
+in which
+\itemize{
+\item \eqn{\hat{p}_{tz}} is the estimated proportion of fish during sampling stratum \emph{t} from age and/or sex category $z$
+\item \eqn{n_{tz}} equals the number of fish sampled during sampling stratum $t$ that were classified as age and/or sex category $z$, and
+\item \eqn{n_t} equals the number of fish sampled for sex determination during sampling stratum $t$.
 }
 
 Here is text
+}
+
+}
+
 }
 }
 \description{
