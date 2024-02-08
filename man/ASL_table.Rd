@@ -13,7 +13,7 @@ ASL_table(
   se_Nhat = NULL,
   stratum_weights = NULL,
   verbose = FALSE,
-  FPC = NA
+  FPC = c("ifknown", "always", "never")
 )
 }
 \arguments{
@@ -48,9 +48,14 @@ underestimating variance.  Defaults to \code{NULL}.}
 \item{verbose}{Whether to print messages corresponding to the method used.
 Defaults to \code{FALSE}.}
 
-\item{FPC}{Whether to incorporate the Finite Population Correction factor in
-variance calculations.  If the default (\code{NA}) is accepted, the FPC will only be
-used if the abundance is considered to be known without error.}
+\item{FPC}{Whether to incorporate the Finite Population Correction factor (FPC) in
+variance calculations.  Allowed values are
+\itemize{
+\item \code{"ifknown"} (the default), which will use the FPC only if abundance is known without error
+\item \code{"always"}, which will use the FPC wherever possible (i.e. if there is an estimate of abundance)
+\item \code{"never"}, which will always ignore the FPC.
+used if the abundance is considered to be known without error.
+}}
 }
 \value{
 A data.frame with rows corresponding to categories of age and/or sex,

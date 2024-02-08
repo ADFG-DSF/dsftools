@@ -66,9 +66,9 @@ for(i_strat in 1:2) {
           se_Nhat <- sqrt(sum(sim_data$abundance$se_Nhat^2))
         }
 
-        if(i_fpc==1) FPC <- TRUE
-        if(i_fpc==2) FPC <- FALSE
-        if(i_fpc==3) FPC <- NA
+        if(i_fpc==1) FPC <- "always" #TRUE
+        if(i_fpc==2) FPC <- "never" #FALSE
+        if(i_fpc==3) FPC <- "ifknown" #NA
 
         # print(ASL_table(age=age,
         #                 length=length,
@@ -93,9 +93,21 @@ for(i_strat in 1:2) {
                                           se_Nhat=se_Nhat,
                                           FPC=FPC,
                                           verbose=FALSE)
-        # if(abs(thesums[countup]-thecheck[countup])>0.01) {
+        # if(abs(thesums[countup]-sums_check[countup])>0.0001) {
         #   print(c(i_strat,i_which,i_known,i_fpc))
+        #   for(ii in 1:3) {
+        #     print(ASL_table(age=age,
+        #                     length=length,
+        #                     stratum=stratum,
+        #                     Nhat=Nhat,
+        #                     se_Nhat=se_Nhat,
+        #                     FPC=c("always","never","ifknown")[ii],
+        #                     verbose=TRUE))
+        #     print(thesums[countup]-sums_check[countup])
+        #   }
         # }
+
+
         # phat_mn <- suppressWarnings(mean(thelist[[countup]]$phat))
         phat_mn <- suppressWarnings(thelist[[countup]]$phat[1])
         if(!is.null(phat_mn)) {
@@ -237,9 +249,9 @@ for(i_strat in 1:2) {
         stratum_weights <- NULL
       }
 
-      if(i_fpc==1) FPC <- TRUE
-      if(i_fpc==2) FPC <- FALSE
-      if(i_fpc==3) FPC <- NA
+      if(i_fpc==1) FPC <- "always" #TRUE
+      if(i_fpc==2) FPC <- "never" #FALSE
+      if(i_fpc==3) FPC <- "ifknown" #NA
 
       # print(ASL_table(age=age,
       #                 length=length,
@@ -298,74 +310,74 @@ for(i_strat in 1:2) {
   }
 }
 
-# phat_arr1[,1,]
-# phat_arr1[,2,]
-# phat_arr1[,3,]
-# se_phat_arr1[,1,]
-# se_phat_arr1[,2,]
-# se_phat_arr1[,3,]
+# # phat_arr1[,1,]
+# # phat_arr1[,2,]
+# # phat_arr1[,3,]
+# # se_phat_arr1[,1,]
+# # se_phat_arr1[,2,]
+# # se_phat_arr1[,3,]
+# #
+# # Nhat_arr1[,1,]
+# # Nhat_arr1[,2,]
+# # Nhat_arr1[,3,]
+# # se_Nhat_arr1[,1,]
+# # se_Nhat_arr1[,2,]
+# # se_Nhat_arr1[,3,]
+# #
+# # xbar_arr1[,1,]
+# # xbar_arr1[,2,]
+# # xbar_arr1[,3,]
+# # se_xbar_arr1[,1,]
+# # se_xbar_arr1[,2,]
+# # se_xbar_arr1[,3,]
 #
-# Nhat_arr1[,1,]
-# Nhat_arr1[,2,]
-# Nhat_arr1[,3,]
-# se_Nhat_arr1[,1,]
-# se_Nhat_arr1[,2,]
-# se_Nhat_arr1[,3,]
+# # all(phat_arr1[,1,1,] == phat_arr1[,1,2,])  # N known same as N estimated
+# # all(phat_arr1[,3,1,] == phat_arr1[,3,2,])  # N known same as N estimated
+# all(is.na(phat_arr1[,2,]))  # not estimated when no proportions
+# all(phat_arr1[,1,1]==phat_arr1[,1,2] & phat_arr1[,1,3]==phat_arr1[,1,2]) # not affected by FPC
+# all(phat_arr1[,3,1]==phat_arr1[,3,2] & phat_arr1[,3,3]==phat_arr1[,3,2]) # not affected by FPC
 #
-# xbar_arr1[,1,]
-# xbar_arr1[,2,]
-# xbar_arr1[,3,]
-# se_xbar_arr1[,1,]
-# se_xbar_arr1[,2,]
-# se_xbar_arr1[,3,]
-
-# all(phat_arr1[,1,1,] == phat_arr1[,1,2,])  # N known same as N estimated
-# all(phat_arr1[,3,1,] == phat_arr1[,3,2,])  # N known same as N estimated
-all(is.na(phat_arr1[,2,]))  # not estimated when no proportions
-all(phat_arr1[,1,1]==phat_arr1[,1,2] & phat_arr1[,1,3]==phat_arr1[,1,2]) # not affected by FPC
-all(phat_arr1[,3,1]==phat_arr1[,3,2] & phat_arr1[,3,3]==phat_arr1[,3,2]) # not affected by FPC
-
-# all(se_phat_arr1[1,1,1,] < se_phat_arr1[1,1,2,])  # SE less when N known
-# all(se_phat_arr1[1,3,1,] < se_phat_arr1[1,3,2,])
-# all(se_phat_arr1[2,1,1,1:2] == se_phat_arr1[2,1,2,1:2])  # estimated N does not affect
-# all(se_phat_arr1[2,3,1,1:2] == se_phat_arr1[2,3,2,1:2])
-all(se_phat_arr1[1,1,] > se_phat_arr1[2,1,])  # SE more when stratified
-all(se_phat_arr1[1,3,] > se_phat_arr1[2,3,])
-all(is.na(se_phat_arr1[,2,]))  # not estimated when no proportions
-# all(se_phat_arr1[,1,1] < se_phat_arr1[,1,2])  # se less with fpc
-# all(se_phat_arr1[,3,1] < se_phat_arr1[,3,2])  # se less with fpc
-
-# all(Nhat_arr1[,1,1,] == Nhat_arr1[,1,2,])  # N known same as N estimated
-# all(Nhat_arr1[,3,1,] == Nhat_arr1[,3,2,])  # N known same as N estimated
-# all(is.na(Nhat_arr1[,2,,]))  # not estimated when no proportions
-# all(Nhat_arr1[,1,,1]==Nhat_arr1[,1,,2] & Nhat_arr1[,1,,3]==Nhat_arr1[,1,,2]) # not affected by FPC
-# all(Nhat_arr1[,3,,1]==Nhat_arr1[,3,,2] & Nhat_arr1[,3,,3]==Nhat_arr1[,3,,2]) # not affected by FPC
+# # all(se_phat_arr1[1,1,1,] < se_phat_arr1[1,1,2,])  # SE less when N known
+# # all(se_phat_arr1[1,3,1,] < se_phat_arr1[1,3,2,])
+# # all(se_phat_arr1[2,1,1,1:2] == se_phat_arr1[2,1,2,1:2])  # estimated N does not affect
+# # all(se_phat_arr1[2,3,1,1:2] == se_phat_arr1[2,3,2,1:2])
+# all(se_phat_arr1[1,1,] > se_phat_arr1[2,1,])  # SE more when stratified
+# all(se_phat_arr1[1,3,] > se_phat_arr1[2,3,])
+# all(is.na(se_phat_arr1[,2,]))  # not estimated when no proportions
+# # all(se_phat_arr1[,1,1] < se_phat_arr1[,1,2])  # se less with fpc
+# # all(se_phat_arr1[,3,1] < se_phat_arr1[,3,2])  # se less with fpc
 #
-# all(se_Nhat_arr1[1,1,1,] < se_Nhat_arr1[1,1,2,])  # SE less when N known
-# all(se_Nhat_arr1[1,3,1,] < se_Nhat_arr1[1,3,2,])
-# all(se_Nhat_arr1[2,1,1,1:2] < se_Nhat_arr1[2,1,2,1:2])  # less when N is known
-# all(se_Nhat_arr1[2,3,1,1:2] < se_Nhat_arr1[2,3,2,1:2])
-# all(se_Nhat_arr1[1,1,,] > se_Nhat_arr1[2,1,,])  # SE more when stratified
-# all(se_Nhat_arr1[1,3,,] > se_Nhat_arr1[2,3,,])
-# all(is.na(se_Nhat_arr1[,2,,]))  # not estimated when no proportions
-# all(se_Nhat_arr1[,1,,1] < se_Nhat_arr1[,1,,2])  # se less with fpc
-# all(se_Nhat_arr1[,3,,1] < se_Nhat_arr1[,3,,2])  # se less with fpc
-
-# all(xbar_arr1[,1,1,] == xbar_arr1[,1,2,])  # N known same as N estimated
-# all(xbar_arr1[,2,1,] == xbar_arr1[,2,2,])  # N known same as N estimated
-all(is.na(xbar_arr1[,3,]))  # not estimated when no lengths
-all(xbar_arr1[,1,1]==xbar_arr1[,1,2] & xbar_arr1[,1,3]==xbar_arr1[,1,2]) # not affected by FPC
-all(xbar_arr1[,2,1]==xbar_arr1[,2,2] & xbar_arr1[,2,3]==xbar_arr1[,2,2]) # not affected by FPC
-
-# all(se_xbar_arr1[1,1,1,] < se_xbar_arr1[1,1,2,])  # SE less when N known
-# all(se_xbar_arr1[1,2,1,] < se_xbar_arr1[1,2,2,])
-# all(se_xbar_arr1[2,1,1,1:2] == se_xbar_arr1[2,1,2,1:2])  # estimated N does not affect
-# all(se_xbar_arr1[2,2,1,1:2] == se_xbar_arr1[2,2,2,1:2])
-all(se_xbar_arr1[1,1,] > se_xbar_arr1[2,1,])  # SE more when stratified
-all(se_xbar_arr1[1,2,] > se_xbar_arr1[2,2,])
-all(is.na(se_xbar_arr1[,3,]))  # not estimated when no proportions
-# all(se_xbar_arr1[,1,1] < se_xbar_arr1[,1,2])  # se less with fpc
-# all(se_xbar_arr1[,2,1,1] < se_xbar_arr1[,2,1,2])  # se less with fpc (subset)
+# # all(Nhat_arr1[,1,1,] == Nhat_arr1[,1,2,])  # N known same as N estimated
+# # all(Nhat_arr1[,3,1,] == Nhat_arr1[,3,2,])  # N known same as N estimated
+# # all(is.na(Nhat_arr1[,2,,]))  # not estimated when no proportions
+# # all(Nhat_arr1[,1,,1]==Nhat_arr1[,1,,2] & Nhat_arr1[,1,,3]==Nhat_arr1[,1,,2]) # not affected by FPC
+# # all(Nhat_arr1[,3,,1]==Nhat_arr1[,3,,2] & Nhat_arr1[,3,,3]==Nhat_arr1[,3,,2]) # not affected by FPC
+# #
+# # all(se_Nhat_arr1[1,1,1,] < se_Nhat_arr1[1,1,2,])  # SE less when N known
+# # all(se_Nhat_arr1[1,3,1,] < se_Nhat_arr1[1,3,2,])
+# # all(se_Nhat_arr1[2,1,1,1:2] < se_Nhat_arr1[2,1,2,1:2])  # less when N is known
+# # all(se_Nhat_arr1[2,3,1,1:2] < se_Nhat_arr1[2,3,2,1:2])
+# # all(se_Nhat_arr1[1,1,,] > se_Nhat_arr1[2,1,,])  # SE more when stratified
+# # all(se_Nhat_arr1[1,3,,] > se_Nhat_arr1[2,3,,])
+# # all(is.na(se_Nhat_arr1[,2,,]))  # not estimated when no proportions
+# # all(se_Nhat_arr1[,1,,1] < se_Nhat_arr1[,1,,2])  # se less with fpc
+# # all(se_Nhat_arr1[,3,,1] < se_Nhat_arr1[,3,,2])  # se less with fpc
+#
+# # all(xbar_arr1[,1,1,] == xbar_arr1[,1,2,])  # N known same as N estimated
+# # all(xbar_arr1[,2,1,] == xbar_arr1[,2,2,])  # N known same as N estimated
+# all(is.na(xbar_arr1[,3,]))  # not estimated when no lengths
+# all(xbar_arr1[,1,1]==xbar_arr1[,1,2] & xbar_arr1[,1,3]==xbar_arr1[,1,2]) # not affected by FPC
+# all(xbar_arr1[,2,1]==xbar_arr1[,2,2] & xbar_arr1[,2,3]==xbar_arr1[,2,2]) # not affected by FPC
+#
+# # all(se_xbar_arr1[1,1,1,] < se_xbar_arr1[1,1,2,])  # SE less when N known
+# # all(se_xbar_arr1[1,2,1,] < se_xbar_arr1[1,2,2,])
+# # all(se_xbar_arr1[2,1,1,1:2] == se_xbar_arr1[2,1,2,1:2])  # estimated N does not affect
+# # all(se_xbar_arr1[2,2,1,1:2] == se_xbar_arr1[2,2,2,1:2])
+# all(se_xbar_arr1[1,1,] > se_xbar_arr1[2,1,])  # SE more when stratified
+# all(se_xbar_arr1[1,2,] > se_xbar_arr1[2,2,])
+# all(is.na(se_xbar_arr1[,3,]))  # not estimated when no proportions
+# # all(se_xbar_arr1[,1,1] < se_xbar_arr1[,1,2])  # se less with fpc
+# # all(se_xbar_arr1[,2,1,1] < se_xbar_arr1[,2,1,2])  # se less with fpc (subset)
 
 
 
@@ -383,15 +395,14 @@ cols_check <- c(10, 10, 10, 10, 10, 10,  6,  6,  6,  6,  6,  6,  5,  5,  5,  5,
                 5,  5, 5,  8,  8,  8,  6,  6,  6,  3,  3,  3,  8,  8,  8, 6,  6,
                 6,  3,  3,  3)
 
-sums_check <- c(120558.3029, 120575.2692, 120558.3029, 126112.8508, 126124.0163, 126124.0163,
-1593.3601,   1593.3670,   1593.3601,   1593.8774,   1593.8774,   1593.8774,
-116386.0509, 116402.9466, 116386.0509, 121940.2906, 121951.3860, 121951.3860,
-120202.1631, 120221.7422, 120202.1631, 124932.9399, 124946.3919, 124946.3919,
-1614.9671,   1614.9754,   1614.9671,   1614.9671,   1614.9754,   1614.9754,
-116044.4955, 116064.0044, 116044.4955, 120775.2723, 120788.6541, 120788.6541,
-4563.4247,   4563.4247,   4563.4247,   1593.3670,   1593.3670,   1593.3670,
-391.1022,    391.1022,    391.1022,   4553.8367,   4553.8367,   4553.8367,
-1614.9754,   1614.9754,   1614.9754,    396.0989,    396.0989,    396.0989)
+sums_check <- c(120558.3029, 120575.2692, 120558.3712, 126112.8508, 126124.0163, 126124.0163,   1593.3601,
+1593.3670,   1593.3601,   1593.8774,   1593.8774,   1593.8774, 116386.0509, 116402.9466,
+116386.0509, 121940.2906, 121951.3860, 121951.3860, 120202.1631, 120221.7422, 120202.2332,
+124932.9399, 124946.3919, 124946.3919,   1614.9671,   1614.9754,   1614.9671,   1614.9671,
+1614.9754,   1614.9754, 116044.4955, 116064.0044, 116044.4955, 120775.2723, 120788.6541,
+120788.6541,   4563.4247,   4563.4247,   4563.4247,   1593.3670,   1593.3670,   1593.3670,
+391.1022,    391.1022,    391.1022,   4553.8367,   4553.8367,   4553.8367,   1614.9754,
+1614.9754,   1614.9754,    396.0989,    396.0989,    396.0989)
 
 # all(abs(thesums - thecheck) < 0.1)
 
@@ -462,7 +473,7 @@ test_that("ASL_table", {
 
   expect_true(all(therows == rows_check))
   expect_true(all(thecols == cols_check))
-  expect_true(all(abs(thesums - sums_check) < 0.001))
+  expect_true(all(abs(thesums - sums_check) < 0.0001))
 })
 
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
