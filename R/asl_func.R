@@ -46,24 +46,98 @@
 #' @return A data.frame with rows corresponding to categories of age and/or sex,
 #' depending on data inputs.
 #'
-#' ## Stratified
+#' ## Stratified - If abundance is known without error
 #'
-#' ### Without error in Nhat
+#' ### If there are proportions
 #'
-#' #### If there are proportions
+#' The proportion of each age and/or sex category *z* will be estimated for each sampling stratum *t* as follows:
 #'
-#' The proportion of each age and/or sex category will be estimated by sampling stratum (period) as follows:
+#'  \deqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
 #'
-#'    \eqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
+#' in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age and/or sex category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age and/or sex determination within sampling stratum \eqn{t}.
 #'
-#' in which
+#' The sampling variance of \eqn{\hat{p}_{tz}} will be estimated as the following (Cochran 1977):
 #'
-#'   *  \eqn{\hat{p}_{tz}} is the estimated proportion of fish during sampling stratum *t* from age and/or sex category $z$
-#'   *  \eqn{n_{tz}} equals the number of fish sampled during sampling stratum $t$ that were classified as age and/or sex category $z$, and
-#'   *  \eqn{n_t} equals the number of fish sampled for sex determination during sampling stratum $t$.
+#' \deqn{\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}\left(\frac{N_t-n_t}{N_t-1}\right)}
 #'
+#' if \eqn{N_t}, the total abundance of fish in sampling stratum \eqn{t}, is known and the finite population correction factor (FPC) is used; otherwise, as the following:
 #'
-#' Here is text
+#' \deqn{\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}}
+#'
+#' The total abundance by age and/or sex category in each sampling stratum will be estimated as follows:
+#'
+#' \deqn{\hat{N}_{tz}=N_t\hat{p}_{tz}}
+#'
+#' with variance estimated as
+#'
+#' \deqn{\hat{var}[\hat{N}_{tz}]=N_t^2\hat{var}[\hat{p}_{tz}]}
+#'
+#' The total abundance by age and/or sex category and its variance will then be estimated by summation as follows:
+#'
+#' \deqn{\hat{N}_z=\sum_{t=1}^{L}\hat{N}_{tz}}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\hat{N}_{z}]=\sum_{t=1}^{L}\hat{var}[\hat{N}_{tz}]}
+#'
+#' where \eqn{L} equals the number of sampling strata.
+#'
+#' Finally, the overall proportion by age and/or sex category and its variance will be estimated as follows:
+#'
+#' \deqn{\hat{p}_z=\frac{\hat{N}_z}{N}}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\hat{p}_z]=\frac{\hat{var}[\hat{N}_z]}{N^2}}
+#'
+#' where \eqn{N} is the total abundance across all sampling periods.
+#'
+#' The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+#'
+#' \deqn{\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}}
+#'
+#' where \eqn{x_{tzi}} is the length of the *i*th fish sampled of age and/or sex \eqn{z} during sampling stratum \eqn{t}.
+#'
+#' The sampling variance of \eqn{\bar{x}_{tz}} will be estimated as
+#'
+#' \deqn{\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}\left(\frac{
+#'     \hat{N}_{tz}-n_{tz}}{\hat{N}_{tz}-1}\right)}
+#'
+#' if the finite population correction factor (FPC) will be used; otherwise, as the following:
+#'
+#' \deqn{\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}}
+#'
+#' The mean length by age and/or sex category will then be estimated as follows:
+#'
+#' \deqn{\bar{x}_z=\sum_{t=1}^{L}\frac{\hat{N}_{tz}}{\hat{N}_z}\bar{x}_{tz}}
+#'
+#' with its variance approximated using a Taylor's series expansion (Mood et al. 1974):
+#'
+#' \deqn{\hat{var}[\bar{x}_z]\approx\sum_{t=1}^{L}\frac{\hat{N}_{tz}^2}{\hat{N}_z^2}\hat{var}[\bar{x}_{tz}]+\sum_{t=1}^{L}\frac{\left(\bar{x}_{tz}\hat{N}_z-\left(\sum_{u=1}^{L}\bar{x}_{uz}\hat{N}_{uz}\right)\right)^2}{\hat{N}_z^4}\hat{var}[\hat{N}_{tz}]}
+#'
+#' ### If there are no proportions to estimate
+#'
+#' The mean length for each sampling stratum will be estimated as follows, where \eqn{x_{ti}} is the length of the *i*th fish sampled within sampling stratum \eqn{t}, and \eqn{n_t} is the number of fish in stratum *t* sampled for length:
+#'
+#' \deqn{\bar{x}_{t}=\frac{\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}}
+#'
+#' The sampling variance of \eqn{\bar{x}_{t}} will be estimated as
+#'
+#' \deqn{\hat{var}[\bar{x}_{t}]=\frac{\sum_{i=1}^{n_{t}}(x_{ti}-\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\left(\frac{
+#' N_{t}-n_{t}}{N_{t}-1}\right)}
+#'
+#' if abundance per stratum \eqn{N_t} is known and if the finite population correction factor is used, otherwise as:
+#'
+#' \deqn{\hat{var}[\bar{x}_{t}]=\frac{\sum_{i=1}^{n_{t}}(x_{ti}-\bar{x}_{t})^2}{n_{t}(n_{t}-1)}}
+#'
+#' Stratified estimates of mean length will be calculated as follows, in which \eqn{N_t} and \eqn{\bar{x}_t} represent the abundance and average length associated with sampling stratum \eqn{t}, respectively, and \eqn{N} represents the total abundance:
+#'
+#' \deqn{\bar{x}=\frac{1}{N}\sum_{t=1}^L N_t\bar{x}_t}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\bar{x}]=\sum_{t=1}^L\left(\frac{N_t}{N}\right)^2 \hat{var}[\bar{x}_t]}
+#'
 #' @author Matt Tyers
 #' @seealso [verify_ASL_table]
 #' @examples
@@ -237,10 +311,10 @@ ASL_table <- function(age=NULL,
           Nt <- Nhat # consistency with report eqns
         }
         xbart <- tapply(length, stratum, mean, na.rm=TRUE)
-        vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
+        vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt*FPC_vec    #### moved FPC_vec to here
         out$n_length <- sum(!is.na(length))
         out$mn_length <- sum(Nt*xbart/sum(Nt))
-        out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart*FPC_vec))
+        out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart))    ####### from here
         out$min_length <- min(length, na.rm=TRUE)
         out$max_length <- max(length, na.rm=TRUE)
       }
@@ -329,14 +403,14 @@ ASL_table <- function(age=NULL,
         }
         if(is.null(stratum_weights) & FPC=="always") {
           FPC_vec <- (Nt-nt)/(Nt-1)
-          if(verbose) cat("\n", "Finite Population Correction factor USED for means ------ except actually not", "\n")
+          if(verbose) cat("\n", "Finite Population Correction factor USED for means", "\n")
         } else {
           FPC_vec <- 1#rep(1, length(Nt))
           if(verbose) cat("\n", "Finite Population Correction factor NOT used for means", "\n")
         }
         Nt <- Nhat # consistency with report eqns
         xbart <- tapply(length, stratum, mean, na.rm=TRUE)
-        vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
+        vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt*FPC_vec ##################### include FPC_vec???
         out$n_length <- sum(nt)
         out$mn_length <- sum(Nt*xbart/sum(Nt))
         # NoverSumN <- Nt/sum(Nt)
