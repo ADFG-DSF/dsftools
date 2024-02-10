@@ -2,15 +2,19 @@ Package: dsftools
 Type: Package
 Title: Common Tools for Fisheries Analyses
 Version: 0.1.0
+Date: 2024-02-09
 Author: Matt Tyers [aut, cre]
 Authors@R: person("Matt", "Tyers", email = "matt.tyers@alaska.gov",
     role = c("aut", "cre"))
 Maintainer: Matt Tyers <matt.tyers@alaska.gov>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: A common repository for shared tools developed by ADFG-DSF.
+    Currently maintained by Matt Tyers, but contribution of functions and 
+    co-authorship is welcomed!
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/ADFG-DSF/dsftools
+BugReports: https://github.com/ADFG-DSF/dsftools/issues
 RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 Depends: R (>= 4.0.0)
