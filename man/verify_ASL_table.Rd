@@ -10,6 +10,7 @@ verify_ASL_table(
   nage,
   nt,
   Nt,
+  stratum_weights = NULL,
   se_Nt = NULL,
   mn_length = NULL,
   sd_length = NULL,
@@ -25,8 +26,10 @@ verify_ASL_table(
 \item{case}{If a pre-determined case is to be used.  Allowed values are
 \code{"stratified_witherror_lengthage"}, \code{"stratified_witherror_age"}, \code{"stratified_witherror_length"},
 \code{"stratified_lengthage"}, \code{"stratified_age"}, \code{"stratified_length"},
+\code{"stratified_Nunknown_lengthage"}, \code{"stratified_Nunknown_age"}, \code{"stratified_Nunknown_length"},
 \code{"pooled_witherror_lengthage"}, \code{"pooled_witherror_age"}, \code{"pooled_witherror_length"}
-\code{"pooled_lengthage"}, \code{"pooled_age"}, or \code{"pooled_length"}. If the default
+\code{"pooled_lengthage"}, \code{"pooled_age"},  \code{"pooled_length"},
+\code{"pooled_Nunknown_lengthage"}, \code{"pooled_Nunknown_length"}, or \code{"pooled_Nunknown_age"}. If the default
 (\code{NULL}) is accepted, all simulation parameters below must be supplied by the user.}
 
 \item{nstrata}{Number of sampling strata}
@@ -35,7 +38,10 @@ verify_ASL_table(
 
 \item{nt}{Sample size for each stratum}
 
-\item{Nt}{Abundance for each stratum}
+\item{Nt}{Abundance for each stratum.  If abundance is completely unknown, sampling
+weights may be used instead in the \verb{sampling_weights=} argument.}
+
+\item{stratum_weights}{Optional vector of sampling weights for each stratum.  Defaults to \code{NULL}.}
 
 \item{se_Nt}{Optional vector of standard errors of abundance for each stratum
 Defaults to \code{NULL}, implying abundance is known without error.}
@@ -86,9 +92,9 @@ It should be noted that all simulated estimation is performed using the
 current version of the \code{ASL_table()} function; therefore any bias or errors
 that are identified should indicate a bug or incorrect derivation!
 
-Twelve pre-determined cases may be used in the \verb{case=} argument, depending on
-whether a stratified sampling scheme is used, whether abundance is known or
-estimated with error, and whether estimates pertaining to categorical (age)
+Eighteen pre-determined cases may be used in the \verb{case=} argument, depending on
+whether a stratified sampling scheme is used, whether abundance is known,
+estimated with error, or completely unknown, and whether estimates pertaining to categorical (age)
 and/or numeric (length) values is to be performed.  In general:
 \itemize{
 \item Five age classes are simulated (if age is considered)
@@ -114,11 +120,13 @@ verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
 nsim <- 5000
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
 "stratified_witherror_length", "stratified_lengthage", "stratified_age",
-"stratified_length", "pooled_witherror_lengthage", "pooled_witherror_age",
-"pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length")
+"stratified_length", "stratified_Nunknown_lengthage", "stratified_Nunknown_age",
+"stratified_Nunknown_length", "pooled_witherror_lengthage", "pooled_witherror_age",
+"pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length",
+"pooled_Nunknown_lengthage", "pooled_Nunknown_age", "pooled_Nunknown_length")
 for(case_i in cases) {
   par(mfrow=c(3,2))
-  verify_ASL_table(case=case_i, nsim=5000)
+  verify_ASL_table(case=case_i, nsim=nsim)
 }
 }
 }

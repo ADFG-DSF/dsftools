@@ -478,8 +478,10 @@ test_that("ASL_table", {
 
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
            "stratified_witherror_length", "stratified_lengthage", "stratified_age",
-           "stratified_length", "pooled_witherror_lengthage", "pooled_witherror_age",
-           "pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length")
+           "stratified_length", "stratified_Nunknown_lengthage", "stratified_Nunknown_age",
+           "stratified_Nunknown_length", "pooled_witherror_lengthage", "pooled_witherror_age",
+           "pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length",
+           "pooled_Nunknown_lengthage", "pooled_Nunknown_age", "pooled_Nunknown_length")
 test_that("verify_ASL_table", {
   for(case_i in cases) {
     expect_silent(verify_ASL_table(case=case_i, nsim=10, verbose=FALSE))
