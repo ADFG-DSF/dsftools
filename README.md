@@ -29,6 +29,10 @@ devtools::install_github("ADFG-DSF/dsftools")
 
 * `ASL_table()` generates a summary table of ASL from vectors of data, and is robust to multiple sampling scenarios (stratified vs. pooled, total abundance known vs. estimated vs. unknown).
   - `verify_ASL_table()` provides a graphical check of the methods used in `ASL_table()` via simulation.
+  
+#### Miscellaneous functions
+
+* `logit()` and `expit()`: functions for logit and inverse-logit
 
 ## What is an R package, and why is `dsftools` structured like one?
 
