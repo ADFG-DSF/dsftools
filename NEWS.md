@@ -2,5 +2,5 @@
 
 Initial creation.  Functions currently include
 
-* `ASL_table()` and `verify_ASL_table()`
-* `logit()` and `expit()`
+* For ASL summaries: `ASL_table()`, `verify_ASL_table()`, and `ASL_boilerplate()`
+* Miscellaneous functions: `logit()` and `expit()`

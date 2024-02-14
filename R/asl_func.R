@@ -1731,6 +1731,9 @@ ptz = 1:5
 # verify_ASL_table(case="pooled_length", nsim=nsim, plot_pop = T)  # warnings again
 
 
+
+
+
 #' Example data: sim_data
 #'
 #' A simulated dataset intended to illustrate \link{ASL_table}.  This dataset
@@ -1742,366 +1745,153 @@ ptz = 1:5
 "sim_data"
 
 
-ASL_boilerplate <- function(age=NULL,
-                      sex=NULL,
-                      length=NULL,
-                      stratum=NULL,
-                      Nhat=NULL,
-                      se_Nhat=NULL,
-                      stratum_weights = NULL,
-                      verbose=FALSE,
-                      FPC=NA) {
 
-  # -------- globally dealing with inputs ----------
-  # combining age/sex categories as available
-  if(!is.null(sex) & !is.null(age)) {
-    cats <- paste(sex, age)
+
+
+
+#' ASL Boilerplate
+#' @description Automagically creates boilerplate text to accompany an ASL
+#' summary analysis, or methods for an Operational Plan.
+#'
+#' This can be done two ways:
+#' * (1) Directly from arguments `stratified=`, `abundance=`, and `data=` (see argument description below)
+#' * (2) From possible inputs to \link{ASL_table}.  This method is provided for convenience.
+#' @param stratified Whether stratified estimators will be used (`TRUE`) or not (`FALSE`)
+#' @param abundance Possible values of `c("known", "estimated", "unknown")`,
+#' defining how abundance is treated.
+#' @param data A vector containing some subset of `c("age", "sex", "length")`,
+#' depending on what data are present
+#' @param species Optional character to use for species.  Defaults to `"fish"`.
+#' @param tense Which verb tense to use.  If the default `NA` is accepted, this
+#' will be imputed as `"future"` if text is constructed from method 1 above,
+#' or `"past"` if text is constructed from data (method 2 above).  Possible
+#' values are `c(NA, "past", "present", "future")`
+#' @param age Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param sex Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param length Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param stratum Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param Nhat Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param se_Nhat Argument to `ASL_table()`.  Defaults to `NULL`.
+#' @param stratum_weights Argument to `ASL_table()`.  Not used.
+#' @param verbose Argument to `ASL_table()`.  Not used.
+#' @param FPC Argument to `ASL_table()`.  Possible arguments are `c("ifknown",
+#' "always", "never")`.  Defaults to `"ifknown"`.
+#' @return NULL
+#' @seealso \link{ASL_table}
+#' @author Matt Tyers
+#' @examples
+#' \dontrun{
+#'
+#' ## An example Rmarkdown code chunk might look like the following:
+#'
+#' ```{r, results='asis', echo=FALSE}
+#' library(dsftools)
+#' ASL_boilerplate(data=c("age", "length"), stratified=TRUE, abundance="known")
+#' ```
+#' }
+#' @export
+ASL_boilerplate <- function(stratified=NULL,   # logical TRUE or FALSE
+                            abundance=NULL,   # c("known", "estimated", "unknown")
+                            data=NULL,   # c("age","sex","length")
+                            species="fish",
+                            tense=c(NA,"past","present","future"),
+                            #FPC somehow??
+
+                            age=NULL,   ### would it be possible to grab these from dots??
+                            sex=NULL,
+                            length=NULL,
+                            stratum=NULL,
+                            Nhat=NULL,
+                            se_Nhat=NULL,
+                            stratum_weights = NULL,
+                            verbose=FALSE,
+                            FPC=c("ifknown", "always", "never")) {
+
+  if(!is.null(stratified) | !is.null(abundance) | !is.null(data)) {
+    if(is.null(stratified) | is.null(abundance) | is.null(data)) {
+      stop("need inputs to stratified=, abundance=, and data=")
+    }
+    fromData <- FALSE
   } else {
-    if(!is.null(sex)) cats <- sex
-    if(!is.null(age)) cats <- age
-    if(is.null(sex) & is.null(age)) cats <- rep("Total", length(length))
+    fromData <- TRUE
   }
 
-  # if(!is.null(stratum)) {
-  #   # taking out data rows where strata value is NA
-  #   length <- length[!is.na(stratum)]
-  #   cats <- cats[!is.na(stratum)]
-  #   stratum <- stratum[!is.na(stratum)]
-  # }
-  #
-  # # this will become output dataframe
-  # out <- data.frame(n=tapply(X=seq_along(cats), INDEX=cats, FUN=base::length))
 
-  # --------- Stratified ----------
-  if(!is.null(stratum)) {
-    # if(verbose) cat("\n", "Stratified","\n")
-    # # checking that inputs make sense
-    #
-    # # if(!inherits(stratum, "integer")) {
-    # #   stop("Stratum values must be positive whole numbers (1, 2, 3, etc.)")  ############### this fails
-    # # }
-    #
-    #
-    # if(length(stratum_weights) != max(stratum) & length(Nhat) != max(stratum)) {
-    #   stop("Length of stratum weights does not equal max stratum value")
-    # }
-
-    # -- Stratified without error in Nhats --
-    if(is.null(se_Nhat)) {
-      # if(verbose) cat("\n", "without error in Nhat", "\n")
-      if(is.na(FPC)) {
-        FPC <- !is.null(Nhat) #& is.null(stratum_weights)
-      }
-      if(is.null(Nhat) & !is.null(stratum_weights)) {
-        Nt <- stratum_weights   # weights will be used instead of true abundance (ok because they are assumed proportional)
-        FPC <- FALSE
-      } else {
-        Nt <- Nhat # consistency with report eqns
-      }
-
-      # pulling these equations from the Jim Creek report
-      if(length(unique(cats)) > 1) {
-
-        # --- if there are proportions to estimate ---
-
-        cat("\n","Estimate proportions, add FPC if present","\n")
-
-        # ntz <- table(stratum, cats, useNA="no")
-        # nt <- rowSums(ntz)
-        # if(!FPC) {
-        #   FPC_vec <- 1#rep(1, length(nt))  # this will ignore FPC in further calculations
-        #   if(verbose) cat("\n","Finite Population Correction factor NOT used","\n")
-        # } else {
-        #   FPC_vec <- (Nt-nt)/(Nt-1)
-        #   if(verbose) cat("\n","Finite Population Correction factor USED","\n")
-        # }
-        # ptz <- ntz/nt
-        # vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec
-        # Ntz <- Nt*ptz
-        # vNtz <- (Nt^2)*vptz
-        # Nz <- colSums(Ntz)
-        # vNz <- colSums(vNtz)
-        # pz <- Nz/sum(Nt)
-        # vpz <- vNz/(sum(Nt)^2)
-        # out$phat <- pz
-        # out$se_phat <- sqrt(vpz)
-        if(!is.null(Nhat)) {
-
-          cat("\n","Estimate abundance, add FPC if present","\n")
+  if(fromData) {
+    stratified <- !is.null(stratum)
+    abundance <- ifelse(is.null(Nhat), "unknown",
+                        ifelse(is.null(se_Nhat), "estimated", "known"))
+    FPC <- match.arg(FPC)
+  }
 
 
-        #   out$Nhat <- Nz
-        #   out$se_Nhat <- sqrt(vNz)
-        }
 
-        # summarizing length
-        if(!is.null(length)) {
+  ### constructing some hidden switches
+  if(fromData) {
+    doAge <- !is.null(age)
+    doSex <- !is.null(sex)
+    doLength <- !is.null(length)
+  } else {
+    doAge <- "age" %in% data
+    doSex <- "sex" %in% data
+    doLength <- "length" %in% data
+  }
 
-          cat("\n","Estimate mean length, add FPC if present","\n")
-
-          # xbartz <- tapply(length, list(stratum, cats), mean, na.rm=TRUE)   ### this should have a na.rm=TRUE !!!
-          # vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
-          # if(FPC) {
-          #   FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
-          # } else {
-          #   FPC_vec2 <- 1#rep(1, length(nt))
-          # }
-          # vxbartz <- tapply(length, list(stratum, cats), var, na.rm=TRUE)/vxbartz_denom * FPC_vec2
-          #
-          # Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
-          # xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=T)
-          #
-          # # Taylor series expansion (Mood et al. 1974)
-          # prod_mat <- matrix(colSums(xbartz*Ntz, na.rm=T), nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
-          # vxbarz <- colSums((Ntz^2)/(Nz_mat^2)*vxbartz, na.rm=T) +
-          #   colSums(((xbartz*Nz_mat - prod_mat)^2)/(Nz_mat^4)*vNtz, na.rm=T)
-          #
-          # # ## estimate xbartz using my ugly derivation
-          # # vsumNtzx <- colSums((Ntz^2)*vxbartz + (xbartz^2)*vNtz - vNtz*vxbartz)
-          # # #vNz is calculated above
-          # # covthing <- colSums(xbartz*vNtz)
-          # # vxbarz <- ((colSums(Ntz*xbartz)/Nz)^2)*(vsumNtzx/(colSums(Ntz*xbartz)^2) + vNz/(Nz^2) - 2*covthing/(colSums(Ntz*xbartz)*Nz))
-          #
-          # out$n_length <- tapply(!is.na(length), cats, sum)
-          # out$mn_length <- xbarz
-          # out$se_length <- sqrt(vxbarz)
-          # out$min_length <- tapply(length, cats, min, na.rm=TRUE)
-          # out$max_length <- tapply(length, cats, max, na.rm=TRUE)
-        }
-      } else {
-        # --- if there are NO proportions to estimate ---
-
-        cat("\n","Estimate mean length, add FPC if present","\n")
-
-        # nt <- table(stratum, is.na(length))[,1] # table(stratum)   ### now excludes NA values in length
-        # if(!FPC) {
-        #   if(verbose) cat("\n","Finite Population Correction factor NOT used", "\n")
-        #   FPC_vec <- 1#rep(1, length(nt))  # this will ignore FPC in further calculations
-        # } else {
-        #   if(verbose) cat("\n","Finite Population Correction factor USED", "\n")
-        #   FPC_vec <- (Nt-nt)/(Nt-1)
-        # }
-        # if(!is.null(stratum_weights)) {
-        #   Nt <- stratum_weights   # weights will be used instead of true abundance (ok because they are assumed proportional)
-        # } else {
-        #   Nt <- Nhat # consistency with report eqns
-        # }
-        # xbart <- tapply(length, stratum, mean, na.rm=TRUE)
-        # vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
-        # out$n_length <- sum(!is.na(length))
-        # out$mn_length <- sum(Nt*xbart/sum(Nt))
-        # out$se_length <- sqrt(sum(((Nt/sum(Nt))^2)*vxbart*FPC_vec))
-        # out$min_length <- min(length, na.rm=TRUE)
-        # out$max_length <- max(length, na.rm=TRUE)
-      }
+  tense <- match.arg(tense)
+  if(is.na(tense)) {
+    if(!fromData) {
+      tense <- "future"
     } else {
-      # -- Stratified with error in Nhats --
-      # estimating proportions..
-      # estimating abundance
-      # summarizing length
-      # if(verbose) cat("\n", "WITH error in Nhat", "\n")
-      if(is.na(FPC)) {
-        FPC <- FALSE
-      }
-      Nt <- Nhat # consistency with report eqns
-      # modifying these equations from the Jim Creek report
-
-      if(length(unique(cats)) > 1) {
-        # --- if there are proportions to estimate ---
-
-        cat("\n","Estimate proportions, add FPC if present","\n")
-
-        # ntz <- table(stratum, cats, useNA="no")
-        # nt <- rowSums(ntz)  # this will be robust to the presence of NA
-        # if(is.null(Nhat) & !is.null(stratum_weights)) {
-        #   stop("Nhat must be supplied when se_Nhat is used.")
-        # } else {
-        #   Nt <- Nhat # consistency with report eqns
-        #   # FPC_vec <- (Nt-nt)/(Nt-1)
-        # }
-        # if(FPC) {
-        #   FPC_vec <- (Nt-nt)/(Nt-1)
-        #   if(verbose) cat("\n", "Finite Population Correction factor USED", "\n")
-        # } else {
-        #   FPC_vec <- 1#rep(1, length(Nt))
-        #   if(verbose) cat("\n", "Finite Population Correction factor NOT used", "\n")
-        # }
-        # ptz <- ntz/nt
-        # vptz <- ptz*(1-ptz)/(nt-1)*FPC_vec
-        # Ntz <- Nt*ptz
-        # vNtz <- ((Nt^2)*vptz) + ((ptz^2)*(se_Nhat^2)) - (vptz*(se_Nhat^2)) ### Goodman
-        # Nz <- colSums(Ntz)
-        # vNz <- colSums(vNtz)
-        # pz <- Nz/sum(Nt)
-        #
-        # # delta method
-        # # covNzSum <- vNz  ## this is a minimum, there should be more
-        # covNzSum <- colSums((se_Nhat^2)*ptz, na.rm=TRUE)  # this seems unbiased!!
-        #
-        # vpz <- ((Nz/sum(Nz))^2)*(vNz/(Nz^2) + sum(se_Nhat^2)/((sum(Nz))^2) - 2*covNzSum/(Nz*sum(Nz)))
-        # out$phat <- pz
-        # out$se_phat <- sqrt(vpz)
-        # # if(any(is.na(out$se_phat))) {
-        # #   print(ntz)
-        # #   print(vpz)
-        # # }
-
-        # out$Nhat <- Nz
-        # out$se_Nhat <- sqrt(vNz)   ## this one seems unbiased still
-
-        cat("\n","Estimate abundance, add FPC if present","\n")
-
-        # summarizing length
-        if(!is.null(length)) {
-          # xbartz <- tapply(length, list(stratum, cats), mean, na.rm=TRUE)   ### this should have a na.rm=TRUE !!!
-          # vxbartz_denom <- table(stratum, cats, is.na(length))[,,1]  # this is like table(stratum, cats, useNA="no") but also excludes NA in length
-          # if(FPC) {
-          #   FPC_vec2 <- (Ntz-vxbartz_denom)/(Ntz-1)  ####### new FPC here
-          # } else {
-          #   FPC_vec2 <- 1#rep(1, length(nt))
-          # }
-          # vxbartz <- tapply(length, list(stratum, cats), var, na.rm=TRUE)/vxbartz_denom * FPC_vec2
-          #
-          # Nz_mat <- matrix(Nz, nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
-          # xbarz <- colSums(xbartz*Ntz/Nz_mat, na.rm=TRUE)
-          # # Taylor series expansion (Mood et al. 1974)
-          # prod_mat <- matrix(colSums(xbartz*Ntz, na.rm=T), nrow=nrow(Ntz), ncol=ncol(Ntz), byrow=T)
-          # vxbarz <- colSums((Ntz^2)/(Nz_mat^2)*vxbartz, na.rm=T) +
-          #   colSums(((xbartz*Nz_mat - prod_mat)^2)/(Nz_mat^4)*vNtz, na.rm=T)
-          # out$n_length <- tapply(!is.na(length), cats, sum)
-          # out$mn_length <- xbarz
-          # out$se_length <- sqrt(vxbarz)
-          # out$min_length <- tapply(length, cats, min, na.rm=TRUE)
-          # out$max_length <- tapply(length, cats, max, na.rm=TRUE)
-
-          cat("\n","Estimate mean length, add FPC if present","\n")
-        }
-      } else {
-        # --- if there are NO proportions to estimate ---
-
-        cat("\n","Estimate mean length, add FPC if present","\n")
-        # nt <- table(stratum, is.na(length))[,1] # table(stratum)   ### now excludes NA values in length
-        # if(is.null(Nhat) & !is.null(stratum_weights)) {
-        #   stop("Nhat must be supplied when se_Nhat is used.")
-        # }
-        # if(FPC) {
-        #   FPC_vec <- (Nt-nt)/(Nt-1)
-        #   if(verbose) cat("\n", "Finite Population Correction factor USED ------ except actually not", "\n")
-        # } else {
-        #   FPC_vec <- 1#rep(1, length(Nt))
-        #   if(verbose) cat("\n", "Finite Population Correction factor NOT used", "\n")
-        # }
-        # Nt <- Nhat # consistency with report eqns
-        # xbart <- tapply(length, stratum, mean, na.rm=TRUE)
-        # vxbart <- tapply(length, stratum, var, na.rm=TRUE)/nt
-        # out$n_length <- sum(nt)
-        # out$mn_length <- sum(Nt*xbart/sum(Nt))
-        # # NoverSumN <- Nt/sum(Nt)
-        # # # from delta method  -- validated by simulation   # currently no fpc anywhere
-        # # vNoverSumN <- (NoverSumN^2)*(((se_Nhat^2)/(Nt^2)) +
-        # #                                (sum(se_Nhat^2)/(sum(Nt)^2)) -
-        # #                                (2*(se_Nhat^2)/(Nt*sum(Nt))))
-        # # # from Goodman
-        # # out$se_length <- sqrt(sum(((NoverSumN^2)*vxbart) +   # vxbart validated by simulation
-        # #                             ((xbart^2)*vNoverSumN) -
-        # #                             (vxbart*vNoverSumN))) #### there is huge covariance in the sum!!
-        # # from covariance identities
-        # covSumNtSum <- sum(xbart*(se_Nhat^2))
-        # # from Goodman
-        # vSumNtXbart <- sum(((Nt^2)*vxbart) +
-        #                      (xbart^2)*(se_Nhat^2) -
-        #                      ((se_Nhat^2)*vxbart))
-        # # from delta method
-        # out$se_length <- sqrt(((sum(Nhat*xbart)/sum(Nhat))^2)*((vSumNtXbart/((sum(Nhat*xbart))^2)) +
-        #                                                          (sum(se_Nhat^2)/((sum(Nhat))^2)) -
-        #                                                          ((2*covSumNtSum)/(sum(Nhat)*sum(Nhat*xbart)))))
-        # out$min_length <- min(length, na.rm=TRUE)
-        # out$max_length <- max(length, na.rm=TRUE)
-      }
+      tense <- "past"
     }
   }
-  # --------- NOT Stratified---------
-  if(is.null(stratum)) {
-    # if(verbose) cat("\n", "not stratified", "\n")
 
-    if(is.na(FPC)) {
-      FPC <- !is.null(Nhat) & is.null(se_Nhat)
+  if(doAge | doLength) {   # if there are proportions
+    if(doAge & doLength) {
+      agelength <- "age and length"
+    } else {
+      if(doAge) agelength <- "age"
+      if(doLength) agelength <- "length"
     }
-    if(FPC & (is.null(Nhat) )) {  #WRONG  | !is.null(se_Nhat)
-      FPC <- FALSE
-    }
-    # if(FPC) {
-    #   FPC_prop <- (Nhat-sum(out$n))/(Nhat-1)
-    #   FPC_mn <- (Nhat-sum(out$n))/(Nhat-1)
-    #   if(verbose) cat("\n", "Finite Population Correction factor USED", "\n")
-    # } else {
-    #   FPC_prop <- 1
-    #   FPC_mn <- 1
-    #   if(verbose) cat("\n", "Finite Population Correction factor NOT used", "\n")
-    # }
-    # # FPC <- ifelse(!is.null(Nhat), (Nhat-sum(out$n))/(Nhat-1), 1)
-    # # FPC_mn <- FPC   # FPC used for variance of mean length
-    #
-    # # checking that inputs make sense
-    # if(length(Nhat) > 1 | length(se_Nhat) > 1 | length(stratum_weights) > 1) {
-    #   stop("Stratum totals or weights are given, but no strata")
-    # }
-
-    # estimating proportions..
-    if(length(unique(cats)) > 1) {
-
-      cat("\n","Estimate proportions, add FPC if present","\n")
-
-      # out_ntot <- sum(out$n)
-      # out$phat <- out$n/out_ntot
-      # out$se_phat <- sqrt(out$phat*(1-out$phat)/(out_ntot-1)*FPC_prop)     ### added fpc
-
-      # estimating abundance..
-      if(!is.null(Nhat)) {
+  }
 
 
-        # out$Nhat <- Nhat * out$phat
-        if(is.null(se_Nhat)) {
+  ### ---------- filling in boilerplate text!!! ---------- ###
 
-          cat("\n","Estimate abundance, add FPC if present","\n")
+  if(stratified) {
+    if(abundance == "known") {
+      if(doAge | doLength) {   # if there are proportions
+        cat("The proportion of each", agelength, "category *z* will be estimated for each sampling stratum *t* as follows:
 
-          # if(verbose) cat("\n", "without error in Nhat", "\n")
-          # out$se_Nhat <- Nhat * out$se_phat   # verify this??
-        } else {
+$$\\hat{p}_{tz}=\\frac{n_{tz}}{n_t}$$
 
-          cat("\n","Estimate abundance, add FPC if present","\n")
-
-          # # Goodman's formula
-          # if(verbose) cat("\n", "with error in Nhat", "\n")
-          # out$se_Nhat <- sqrt(((Nhat^2)*(out$se_phat^2)) +
-          #                       ((out$phat^2)*(se_Nhat^2)) -
-          #                       ((out$se_phat^2)*(se_Nhat^2)))
-        }
-
-        # # updating FPC for mean if there are categories AND est abundance
-        # if(FPC) {
-        #   FPC_mn <- (out$Nhat - out$n)/(out$Nhat - 1)
-        # }
+in which $n_{tz}$ equals the number of", species, "sampled during sampling stratum $t$ classified as",
+agelength, "category $z$, and $n_t$ equals the number of", species, "sampled for", agelength)
       }
     }
 
-    # and summarizing lengths..
-    if(!is.null(length)) {
+    if(abundance == "estimated") {
 
-      cat("\n","Estimate mean length, add FPC if present","\n")
+    }
 
-      # n_notNA <- tapply(!is.na(length), cats, sum)
-      # out$n_length <- n_notNA
-      # out$mn_length <- tapply(length, cats, mean, na.rm=TRUE)
-      # out_sd_length <- tapply(length, cats, sd, na.rm=TRUE) * sqrt(FPC_mn)
-      # # sqrt((out$Nhat-n_notNA)/(out$Nhat-1)) ## NEW FPC    # sqrt(FPC)     ### added fpc
-      # out$se_length <- out_sd_length/sqrt(n_notNA)
-      # out$min_length <- tapply(length, cats, min, na.rm=TRUE)
-      # out$max_length <- tapply(length, cats, max, na.rm=TRUE)
+    if(abundance == "unknown") {
+
+    }
+  } else {  # if !stratified
+    if(abundance == "known") {
+
+    }
+
+    if(abundance == "estimated") {
+
+    }
+
+    if(abundance == "unknown") {
+
     }
   }
-  # return(out)
 }
+# ASL_boilerplate(data=c("age","length"), stratified=T, abundance="known")
 
 # ASL_boilerplate(age=sim_data$data$age,
 #           length=sim_data$data$length,
