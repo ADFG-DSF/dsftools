@@ -14,6 +14,10 @@
 #' Generally, `NULL` values in a given data vector indicate that the vector will
 #' not be used.
 #'
+#' Methods are also described in the document found here:
+#'
+#' `https://github.com/ADFG-DSF/dsftools/blob/main/addl_documentation/asl_equations.Rmd`
+#'
 #' @param age Vector of ages.  If the default (`NULL`) is accepted, age will be
 #' omitted from the resulting table.
 #' @param sex Vector of sex.  If the default (`NULL`) is accepted, sex will be
@@ -301,7 +305,9 @@
 #'
 #' ## Pooled (not stratified) - If abundance is known without error
 #'
-#' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
+#' ### If there are proportions
+#'
+#' #' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 #'
 #' \deqn{\hat{p}_z=\frac{n_z}{n}}
 #'
@@ -333,7 +339,23 @@
 #'
 #' \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
 #'
+#' ### If there are no proportions to estimate
+#'
+#' The mean length of all fish will be estimated as the following, in which \eqn{x_{i}} represents the length of the *i*th fish, *n* represents the number of fish with an associated length measurement, and *N* represents the total abundance:
+#'
+#' \deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}\left(\frac{N-n}{N-1}\right)}
+#'
+#' if the finite population correction factor (FPC) is used, otherwise as:
+#'
+#' \deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
+#'
 #' ## Pooled (not stratified) - If abundance is estimated with error
+#'
+#' ### If there are proportions
 #'
 #' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 #'
@@ -369,7 +391,23 @@
 #'
 #' \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
 #'
+#' ### If there are no proportions to estimate
+#'
+#' The mean length of all fish will be estimated as the following, in which \eqn{x_{i}} represents the length of the *i*th fish, *n* represents the number of fish with an associated length measurement, and \eqn{\hat{N}} represents the estimated total abundance:
+#'
+#' \deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}\left(\frac{\hat{N}-n}{\hat{N}-1}\right)}
+#'
+#' if the finite population correction factor (FPC) is used, otherwise as:
+#'
+#' \deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
+#'
 #' ## Pooled (not stratified) - If abundance is unknown
+#'
+#' ### If there are proportions
 #'
 #' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 #'
@@ -388,6 +426,16 @@
 #' and
 #'
 #' \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
+#'
+#' ### If there are no proportions to estimate
+#'
+#' The mean length will be estimated as the following, in which \eqn{x_{i}} denotes the length measurement associated with the *i*th fish and *n* denotes the number of fish with an associated length measurement:
+#'
+#' \deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+#'
+#' and
+#'
+#' \deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
 #'
 #' @references Casella, George and Roger L. Berger. 2002. *Statistical Inference*. Australia ; Pacific Grove, CA, Thomson Learning
 #'
@@ -1756,6 +1804,10 @@ ptz = 1:5
 #' This can be done two ways:
 #' * (1) Directly from arguments `stratified=`, `abundance=`, and `data=` (see argument description below)
 #' * (2) From possible inputs to \link{ASL_table}.  This method is provided for convenience.
+#'
+#' Text and equations are taken directly from the document found here:
+#'
+#' `https://github.com/ADFG-DSF/dsftools/blob/main/addl_documentation/asl_equations.Rmd`
 #' @param stratified Whether stratified estimators will be used (`TRUE`) or not (`FALSE`)
 #' @param abundance Possible values of `c("known", "estimated", "unknown")`,
 #' defining how abundance is treated.
@@ -1821,8 +1873,8 @@ ASL_boilerplate <- function(stratified=NULL,   # logical TRUE or FALSE
     stratified <- !is.null(stratum)
     abundance <- ifelse(is.null(Nhat), "unknown",
                         ifelse(is.null(se_Nhat), "estimated", "known"))
-    FPC <- match.arg(FPC)
   }
+  FPC <- match.arg(FPC)
 
 
 
@@ -1846,52 +1898,562 @@ ASL_boilerplate <- function(stratified=NULL,   # logical TRUE or FALSE
     }
   }
 
-  if(doAge | doLength) {   # if there are proportions
-    if(doAge & doLength) {
-      agelength <- "age and length"
+  doProp <- (doAge | doSex)  # if there are proportions
+
+  if(doProp) {   # if there are proportions
+    if(doAge & doSex) {
+      agesex <- "age and sex"
     } else {
-      if(doAge) agelength <- "age"
-      if(doLength) agelength <- "length"
+      if(doAge) agesex <- "age"
+      if(doSex) agesex <- "sex"
     }
   }
+
+  if(abundance == "known") {
+    doFPCprop <- (FPC != "never")
+    doFPCmean <- (FPC == "always")
+    if(!doAge & !doSex) {
+      doFPCmean <- (FPC != "never")     ##### make sure ASL_table follows this rule
+                                        ##### strat and pooled!!  - fill in FPC in asl_equations DARN
+    }
+  }
+  if(abundance == "estimated") {
+    doFPCprop <- (FPC == "always")
+    doFPCmean <- (FPC == "always")
+  }
+  if(abundance == "unknown") {
+    doFPCprop <- FALSE
+    doFPCmean <- FALSE
+  }
+
+  # initializing reference switches, these will be turned to TRUE if needed
+  doCasella <- FALSE
+  doCochran <- doProp
+  doGoodman <- (abundance == "estimated")
+  doMood <- FALSE
 
 
   ### ---------- filling in boilerplate text!!! ---------- ###
 
   if(stratified) {
     if(abundance == "known") {
-      if(doAge | doLength) {   # if there are proportions
-        cat("The proportion of each", agelength, "category *z* will be estimated for each sampling stratum *t* as follows:
+      if(doProp) {   # if there are proportions
+        cat("The proportion of each ",
+            agesex,
+            " category *z* will be estimated for each sampling stratum *t* as follows:
 
 $$\\hat{p}_{tz}=\\frac{n_{tz}}{n_t}$$
 
-in which $n_{tz}$ equals the number of", species, "sampled during sampling stratum $t$ classified as",
-agelength, "category $z$, and $n_t$ equals the number of", species, "sampled for", agelength)
+in which $n_{tz}$ equals the number of ",
+species,
+" sampled during sampling stratum $t$ classified as ",
+agesex,
+" category $z$, and $n_t$ equals the number of ",
+species,
+" sampled for ",
+agesex,
+" determination within sampling stratum $t$.
+
+The sampling variance of $\\hat{p}_{tz}$ will be estimated as the following (Cochran 1977)")
+        if(doFPCprop) {
+          cat(", in which $N_t$ represents the total abundance of ",
+species,
+" in sampling stratum *t*:
+
+$$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}\\left(\\frac{N_t-n_t}{N_t-1}\\right)$$
+")
+        } else {
+          cat("$$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}$$
+")
+        }
+        cat("
+The total abundance by ",
+agesex,
+" category in each sampling stratum will be estimated as follows:
+
+$$\\hat{N}_{tz}=N_t\\hat{p}_{tz}$$
+
+with variance estimated as
+
+$$\\hat{var}[\\hat{N}_{tz}]=N_t^2\\hat{var}[\\hat{p}_{tz}]$$
+
+The total abundance by ",
+agesex,
+" category and its variance will then be estimated by summation as follows:
+
+$$\\hat{N}_z=\\sum_{t=1}^{L}\\hat{N}_{tz}$$
+
+and
+
+$$\\hat{var}[\\hat{N}_{z}]=\\sum_{t=1}^{L}\\hat{var}[\\hat{N}_{tz}]$$
+
+where $L$ equals the number of sampling strata.
+
+Finally, the overall proportion by ",
+agesex,
+" category and its variance will be estimated as follows:
+
+$$\\hat{p}_z=\\frac{\\hat{N}_z}{N}$$
+
+and
+
+$$\\hat{var}[\\hat{p}_z]=\\frac{\\hat{var}[\\hat{N}_z]}{N^2}$$
+
+where $N$ is the total abundance across all sampling periods.
+")
+if(doLength) {
+  doMood <- TRUE
+  cat("
+The mean length by ",
+agesex,
+" for each sampling stratum will be estimated as follows:
+
+$$\\bar{x}_{tz}=\\frac{\\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
+
+where $x_{tzi}$ is the length of the *i*th ",
+species,
+" sampled of ",
+agesex,
+" category $z$ during sampling stratum $t$.
+
+The sampling variance of $\\bar{x}_{tz}$ will be estimated as
+")
+  if(doFPCmean) {
+    cat("
+$$\\hat{var}[\\bar{x}_{tz}]=\\frac{\\sum_{i=1}^{n_{tz}}(x_{tzi}-\\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}\\left(\\frac{\\hat{N}_{tz}-n_{tz}}{\\hat{N}_{tz}-1}\\right)$$
+")
+  } else {
+    cat("
+$$\\hat{var}[\\bar{x}_{tz}]=\\frac{\\sum_{i=1}^{n_{tz}}(x_{tzi}-\\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
+")
+  }
+  cat("
+The mean length by ",
+agesex,
+" category will then be estimated as follows:
+
+$$\\bar{x}_z=\\sum_{t=1}^{L}\\frac{\\hat{N}_{tz}}{\\hat{N}_z}\\bar{x}_{tz}$$
+
+with its variance approximated using a Taylor's series expansion (Mood et al. 1974):
+
+$$\\hat{var}[\\bar{x}_z]\\approx\\sum_{t=1}^{L}\\frac{\\hat{N}_{tz}^2}{\\hat{N}_z^2}\\hat{var}[\\bar{x}_{tz}]+\\sum_{t=1}^{L}\\frac{\\left(\\bar{x}_{tz}\\hat{N}_z-\\left(\\sum_{u=1}^{L}\\bar{x}_{uz}\\hat{N}_{uz}\\right)\\right)^2}{\\hat{N}_z^4}\\hat{var}[\\hat{N}_{tz}]$$")
+
+}
+      } else { # if there are no proportions
+cat("The mean length for each sampling stratum will be estimated as follows, where $x_{ti}$ is the length of the *i*th ",
+    species,
+    " sampled within sampling stratum $t$, and $n_t$ is the number of ",
+    species,
+    " in stratum *t* sampled for length:
+
+$$\\bar{x}_{t}=\\frac{\\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}$$
+
+The sampling variance of $\\bar{x}_{t}$ will be estimated as
+")
+        if(doFPCmean) {
+          cat("
+$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\\left(\\frac{N_{t}-n_{t}}{N_{t}-1}\\right)$$
+")
+        } else {
+          cat("
+$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
+")
+        }
+        cat("
+Stratified estimates of mean length will be calculated as follows, in which $N_t$ represents the abundance associated with sampling stratum $t$, $N$ represents the total abundance, and *L* represents the number of sampling strata:
+
+$$\\bar{x}=\\frac{1}{N}\\sum_{t=1}^L N_t\\bar{x}_t$$
+
+and
+
+$$\\hat{var}[\\bar{x}]=\\sum_{t=1}^L\\left(\\frac{N_t}{N}\\right)^2 \\hat{var}[\\bar{x}_t]$$")
       }
     }
 
     if(abundance == "estimated") {
+      if(doProp) {
+        cat("The proportion of each ", agesex, " category *z* will be estimated for each sampling stratum *t* as follows:
+
+$$\\hat{p}_{tz}=\\frac{n_{tz}}{n_t}$$
+
+in which $n_{tz}$ equals the number of ", species, " sampled during sampling stratum $t$ classified as ", agesex, " category $z$, and $n_t$ equals the number of ", species, " sampled for ", agesex, " determination within sampling stratum $t$.
+
+The sampling variance of $\\hat{p}_{tz}$ will be estimated as the following (Cochran 1977) in which $\\hat{N}_t$ is the estimated abundance of ", species, " in sampling stratum $t$:")
+        if(doFPCprop) {
+          cat("
+
+$$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}\\left(\\frac{\\hat{N}_t-n_t}{\\hat{N}_t-1}\\right)$$
+")
+        } else {
+          cat(":
+
+$$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}$$")
+        }
+        doCasella <- TRUE
+cat("
+
+The total abundance by ", agesex, " category in each sampling stratum will be estimated as follows:
+
+$$\\hat{N}_{tz}=\\hat{N}_t\\hat{p}_{tz}$$
+
+with variance estimated as (Goodman 1960):
+
+$$\\hat{var}[\\hat{N}_{tz}]=\\hat{N}_t^2\\hat{var}[\\hat{p}_{tz}] + \\hat{p}_{tz}^2\\hat{var}[\\hat{N}_t]-\\hat{var}[\\hat{p}_{tz}]\\hat{var}[\\hat{p}_{tz}]$$
+
+The total abundance by ", agesex, " category $z$ and its variance will then be estimated by summation as follows:
+
+$$\\hat{N}_z=\\sum_{t=1}^{L}\\hat{N}_{tz}$$
+
+and
+
+$$\\hat{var}[\\hat{N}_{z}]=\\sum_{t=1}^{L}\\hat{var}[\\hat{N}_{tz}]$$
+
+where $L$ equals the number of sampling strata.
+
+Finally, the overall proportion by ", agesex, " category and its variance will be estimated as follows:
+
+$$\\hat{p}_z=\\frac{\\hat{N}_z}{\\sum_{t=1}^{L}\\hat{N}_t}$$
+
+with variance estimated by the delta method (Casella & Berger 2002) as:
+
+$$\\hat{var}[\\hat{p}_z] \\approx \\left(\\frac{\\hat{N}_z}{\\sum_{t=1}^{L}\\hat{N}_t}\\right)^2\\left(\\frac{\\hat{var}[\\hat{N}_z]}{\\hat{N}_z^2} + \\frac{\\sum_{t=1}^{L}\\hat{var}[\\hat{N}_t]}{(\\sum_{t=1}^{L}\\hat{N}_t)^2} - 2\\frac{\\hat{cov}[\\hat{N}_z,\\sum_{t=1}^{L}\\hat{N}_t]}{\\hat{N}_z\\sum_{t=1}^{L}\\hat{N}_t}\\right)$$
+
+in which
+
+$$\\hat{cov}[\\hat{N}_z,\\sum_{t=1}^{L}\\hat{N}_t]=\\sum_{t=1}^{L}\\hat{p}_{tz}\\hat{var}[\\hat{N_t}]$$
+
+")
+if(doLength) {
+  doMood <- TRUE
+  cat("
+The mean length by ", agesex, " for each sampling stratum will be estimated as follows:
+
+$$\\bar{x}_{tz}=\\frac{\\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
+
+where $x_{tzi}$ is the length of the *i*th ", species, " sampled of ", agesex, " $z$ during sampling stratum $t$.
+
+The sampling variance of $\\bar{x}_{tz}$ will be estimated as
+
+")
+  if(doFPCmean) {
+    cat("$$\\hat{var}[\\bar{x}_{tz}]=\\frac{\\sum_{i=1}^{n_{tz}}(x_{tzi}-\\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}\\left(\\frac{\\hat{N}_{tz}-n_{tz}}{\\hat{N}_{tz}-1}\\right)$$
+
+")
+  } else {
+    cat("$$\\hat{var}[\\bar{x}_{tz}]=\\frac{\\sum_{i=1}^{n_{tz}}(x_{tzi}-\\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
+
+")
+  }
+cat("
+The mean length by ", agesex, " category will then be estimated as follows:
+
+$$\\bar{x}_z=\\sum_{t=1}^{L}\\frac{\\hat{N}_{tz}}{\\hat{N}_z}\\bar{x}_{tz}$$
+
+with its variance approximated using a Taylor's series expansion (Mood et al. 1974):
+
+$$\\hat{var}[\\bar{x}_z]\\approx\\sum_{t=1}^{L}\\frac{\\hat{N}_{tz}^2}{\\hat{N}_z^2}\\hat{var}[\\bar{x}_{tz}]+\\sum_{t=1}^{L}\\frac{\\left(\\bar{x}_{tz}\\hat{N}_z-\\left(\\sum_{u=1}^{L}\\bar{x}_{uz}\\hat{N}_{uz}\\right)\\right)^2}{\\hat{N}_z^4}\\hat{var}[\\hat{N}_{tz}]$$
+")
+}
+      } else {  # no proportions
+        doCasella <- TRUE
+        doGoodman <- TRUE
+cat("The mean length for each sampling stratum will be estimated as follows, where $x_{ti}$ is the length of the *i*th ", species, " sampled within sampling stratum $t$, and $n_t$ is the number of ", species, " in stratum *t* sampled for length:
+
+$$\\bar{x}_{t}=\\frac{\\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}$$
+
+The sampling variance of $\\bar{x}_{t}$ will be estimated as
+
+")
+if(doFPCmean) {
+  cat("$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\\left(\\frac{\\hat{N}_{t}-n_{t}}{\\hat{N}_{t}-1}\\right)$$
+
+")
+} else {
+  cat("$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
+
+")
+  }
+cat("Stratified estimates of mean length will be calculated as follows, in which $\\hat{N}_t$ and $\\bar{x}_t$ represent the estimated abundance and mean length associated with stratum *t*, respectively:
+
+$$\\bar{x}=\\frac{\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t}{\\sum_{t=1}^L \\hat{N}_t}$$
+
+and
+
+$$\\hat{var}[\\bar{x}] \\approx \\left(\\frac{\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t}{\\sum_{t=1}^L \\hat{N}_t}\\right)^2\\left(\\frac{\\hat{var}[\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t]}{\\left(\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t\\right)^2}+\\frac{\\sum_{t=1}^L \\hat{var}[\\hat{N}_t]}{\\left(\\sum_{t=1}^L \\hat{N}_t\\right)^2}-2\\frac{\\hat{cov}[\\sum_{t=1}^L \\hat{N}_t,\\sum_{t=1}^L N_t\\bar{x}_t]}{\\left(\\sum_{t=1}^L \\hat{N}_t\\right)\\left(\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t\\right)}\\right)$$
+
+in which
+
+$$\\hat{cov}[\\sum_{t=1}^L \\hat{N}_t,\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t]=\\sum_{t=1}^L \\bar{x}_t\\hat{var}[\\hat{N}_t]$$
+
+and
+
+$$\\hat{var}[\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t]=\\sum_{t=1}^L\\hat{N}_t^2\\hat{var}[\\bar{x}_t] + \\bar{x}_t^2\\hat{var}[\\hat{N}_t]-\\hat{var}[\\hat{N}_t]\\hat{var}[\\bar{x}_t]$$
+
+by means of the delta method (Casella & Berger 2002) and Goodman (1960), respectively.")
+      }
 
     }
 
     if(abundance == "unknown") {
+      if(doProp) {
+        cat("The proportion of each ", agesex, " category *z* will be estimated for each sampling stratum *t* as follows:
 
+$$\\hat{p}_{tz}=\\frac{n_{tz}}{n_t}$$
+
+in which $n_{tz}$ equals the number of ", species," sampled during sampling stratum $t$ classified as ", agesex, " category $z$, and $n_t$ equals the number of ", species," sampled for ", agesex, " determination within sampling stratum $t$.
+
+The sampling variance of $\\hat{p}_{tz}$ will be estimated as the following (Cochran 1977):
+
+$$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}$$
+
+The overall proportion by ", agesex, " category and its variance will be estimated as follows, in which $w_t$ represents the sampling weight associated with stratum *t* and *L* equals the number of strata.  It is worth noting that weights $w_t$ are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions.
+
+$$\\hat{p}_z=\\frac{\\sum_{t=1}^Lw_t\\hat{p}_{tz}}{\\sum_{t=1}^Lw_t}$$
+
+and
+
+$$\\hat{var}[\\hat{p}_z]=\\frac{\\sum_{t=1}^Lw_t^2\\hat{var}[\\hat{p}_{tz}]}{\\left(\\sum_{t=1}^Lw_t\\right)^2}$$
+
+")
+        if(doLength) {
+          doMood <- TRUE
+          cat("The mean length by ", agesex, " for each sampling stratum will be estimated as follows:
+
+$$\\bar{x}_{tz}=\\frac{\\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
+
+where $x_{tzi}$ is the length of the *i*th ", species," sampled of ", agesex, " $z$ during sampling stratum $t$.
+
+The sampling variance of $\\bar{x}_{tz}$ will be estimated as:
+
+$$\\hat{var}[\\bar{x}_{tz}]=\\frac{\\sum_{i=1}^{n_{tz}}(x_{tzi}-\\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
+
+The mean length by ", agesex, " category will then be estimated as follows:
+
+$$\\bar{x}_z=\\frac{\\sum_{t=1}^{L}w_t\\hat{p}_{tz}\\bar{x}_{tz}}{\\sum_{t=1}^{L}w_t\\hat{p}_{tz}}$$
+
+with its variance approximated using a Taylor's series expansion (Mood et al. 1974):
+
+$$\\hat{var}[\\bar{x}_z]\\approx\\frac{\\sum_{t=1}^{L}w_t\\hat{p}_{tz}^2\\hat{var}[\\bar{x}_{tz}]}{\\left(\\sum_{t=1}^Lw_t\\hat{p}_{tz}\\right)^2}+\\frac{\\sum_{t=1}^{L}\\left(\\bar{x}_{tz}\\sum_{u=1}^Lw_u\\hat{p}_{uz}-\\left(\\sum_{u=1}^{L}\\bar{x}_{uz}w_u\\hat{p}_{uz}\\right)\\right)^2w_t^2\\hat{var}[\\hat{p}_{tz}]}{\\left(\\sum_{t=1}^Lw_t\\hat{p}_{tz}\\right)^4}$$")
+        }
+      } else {  # no proportions
+        cat("The mean length for each sampling stratum will be estimated as follows, where $x_{ti}$ is the length of the *i*th ", species," sampled within sampling stratum $t$, and $n_t$ is the number of ", species," in stratum *t* sampled for length:
+
+$$\\bar{x}_{t}=\\frac{\\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}$$
+
+The sampling variance of $\\bar{x}_{t}$ will be estimated as:
+
+$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
+
+Stratified estimates of mean length will be calculated as follows, in which $w_t$ and $\\bar{x}_t$ represent the sampling weight and average length associated with sampling stratum $t$, respectively.  It is worth noting that weights $w_t$ are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions.
+
+$$\\bar{x}=\\frac{\\sum_{t=1}^L w_t\\bar{x}_t}{\\sum_{t=1}^L w_t}$$
+
+and
+
+$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{t=1}^L w_t^2\\hat{var}[\\bar{x}_t]}{\\left(\\sum_{t=1}^L w_t\\right)^2}$$")
+      }
     }
   } else {  # if !stratified
     if(abundance == "known") {
+      if(doProp) {
+        cat("Proportions of each ", agesex, " category $z$ will be estimated as follows (Cochran 1977):
 
+$$\\hat{p}_z=\\frac{n_z}{n}$$
+
+and
+
+")
+        if(doFPCprop) {
+          cat("$$\\hat{var}[\\hat{p}_z]=\\frac{\\hat{p}(1-\\hat{p})}{n-1}\\left(\\frac{N-n}{N-1}\\right)$$
+
+")
+          } else {
+            cat("$$\\hat{var}[\\hat{p}_z]=\\frac{\\hat{p}_z(1-\\hat{p}_z)}{n-1}$$
+
+")
+          }
+        cat("in which $n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, $n$ denotes the total number of ", species, " sampled, and *N* denotes the total abundance.
+
+Total abundance for ", agesex, " category $z$ will be estimated as
+
+$$\\hat{N}_z=N\\hat{p}_z$$
+
+and
+
+$$\\hat{var}[\\hat{N}_z]=N^2\\hat{var}[\\hat{p}_z]$$
+
+")
+        if(doLength) {
+          cat("The mean length associated with ", agesex, " category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of the *i*th ", species, " in ", agesex, " category *z* and $n_z$ represents the number of ", species, " in ", agesex, " category *z* with an associated length measurement:
+
+$$\\bar{x}_z=\\frac{\\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
+
+and
+
+")
+          if(doFPCmean) {
+            cat("$$\\hat{var}[\\bar{x}_z]=\\frac{\\sum_{i=1}^{n_z}(x_{zi}-\\bar{x_z})^2}{n_z(n_z-1)}\\left(\\frac{\\hat{N}_z-n_z}{\\hat{N}_z-1}\\right)$$
+
+")
+            } else {
+              cat("$$\\hat{var}[\\bar{x}_z]=\\frac{\\sum_{i=1}^{n_z}(x_{zi}-\\bar{x_z})^2}{n_z(n_z-1)}$$")
+            }
+        }
+      } else {  # no proportions
+        cat("The mean length of all ", species, " will be estimated as the following, in which $x_{i}$ represents the length of the *i*th ", species, ", $n$ represents the number of ", species, " with an associated length measurement, and *N* represents the total abundance:
+
+$$\\bar{x}=\\frac{\\sum_{i=1}^{n}x_{i}}{n}$$
+
+and
+
+")
+        if(doFPCmean) {
+          cat("$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}\\left(\\frac{N-n}{N-1}\\right)$$
+
+")
+          } else {
+            cat("$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}$$")
+          }
+      }
     }
 
     if(abundance == "estimated") {
+      if(doProp) {
+        cat("Proportions of each ", agesex, " category $z$ will be estimated as follows (Cochran 1977):
 
+$$\\hat{p}_z=\\frac{n_z}{n}$$
+
+and
+
+")
+        if(doFPCprop) {
+          cat("$$\\hat{var}[\\hat{p}]=\\frac{\\hat{p}(1-\\hat{p})}{n-1}\\left(\\frac{\\hat{N}-n}{\\hat{N}-1}\\right)$$
+
+")
+          } else {
+            cat("$$\\hat{var}[\\hat{p}]=\\frac{\\hat{p}(1-\\hat{p})}{n-1}$$
+
+")
+            }
+        cat("in which $n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, $n$ denotes the total number of ", species, " sampled, and $\\hat{N}$ denotes the estimated abundance.
+
+Total abundance for ", agesex, " category $z$ will be estimated as follows (Goodman 1960):
+
+$$\\hat{N}_z=\\hat{N}\\hat{p}_z$$
+
+and
+
+$$\\hat{var}[\\hat{N}_z]=\\hat{N}^2\\hat{var}[\\hat{p}_z] + \\hat{p}_z^2\\hat{var}[\\hat{N}]-\\hat{var}[\\hat{N}]\\hat{var}[\\hat{p}_z]$$
+
+")
+        if(doLength) {
+          cat("The mean length associated with ", agesex, " category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of ", species, " *i* within ", agesex, " category category *z*, and $n_z$ denotes the number of ", species, " within ", agesex, " category *z* with an associated length measurement:
+
+$$\\bar{x}_z=\\frac{\\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
+
+and
+
+")
+          if(doFPCmean) {
+            cat("$$\\hat{var}[\\bar{x}_z]=\\frac{\\sum_{i=1}^{n_z}(x_{zi}-\\bar{x_z})^2}{n_z(n_z-1)}\\left(\\frac{\\hat{N}_z-n_z}{\\hat{N}_z-1}\\right)$$
+
+")
+            } else {
+              cat("$$\\hat{var}[\\bar{x}_z]=\\frac{\\sum_{i=1}^{n_z}(x_{zi}-\\bar{x_z})^2}{n_z(n_z-1)}$$")
+            }
+        }
+      } else {  # no proportions
+        cat("The mean length of all ", species, " will be estimated as the following, in which $x_{i}$ represents the length of the *i*th ", species, ", $n$ represents the number of ", species, " with an associated length measurement, and $\\hat{N}$ represents the estimated total abundance:
+
+$$\\bar{x}=\\frac{\\sum_{i=1}^{n}x_{i}}{n}$$
+
+and
+
+")
+        if(doFPCmean) {
+          cat("$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}\\left(\\frac{\\hat{N}-n}{\\hat{N}-1}\\right)$$
+
+")
+          } else {
+            cat("$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}$$")
+          }
+      }
     }
 
     if(abundance == "unknown") {
+      if(doProp) {
+        cat("Proportions of each ", agesex, " category $z$ will be estimated as follows (Cochran 1977):
 
+$$\\hat{p}_z=\\frac{n_z}{n}$$
+
+and
+
+$$\\hat{var}[\\hat{p}_z]=\\frac{\\hat{p}_z(1-\\hat{p}_z)}{n-1}$$
+
+in which $n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, and $n$ denotes the total number of ", species, " sampled.
+
+")
+      if(doLength) {
+        cat("The mean length associated with ", agesex, " category $z$ will be estimated as the following, in which $x_{zi}$ denotes the length measurement associated with the *i*th ", species, " in ", agesex, " category *z*:
+
+$$\\bar{x}_z=\\frac{\\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
+
+and
+
+$$\\hat{var}[\\bar{x}_z]=\\frac{\\sum_{i=1}^{n_z}(x_{zi}-\\bar{x_z})^2}{n_z(n_z-1)}$$
+")
+      }
+      } else {
+        cat("The mean length will be estimated as the following, in which $x_{i}$ denotes the length measurement associated with the *i*th ", species, " and $n$ denotes the number of ", species, " with an associated length measurement:
+
+$$\\bar{x}=\\frac{\\sum_{i=1}^{n}x_{i}}{n}$$
+
+and
+
+$$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}$$")
+      }
     }
   }
+
+  ### Printing references
+
+  cat("
+
+## References
+
+")
+  if(doCasella) {
+cat("Casella, George and Roger L. Berger. 2002. *Statistical Inference*. Australia ; Pacific Grove, CA, Thomson Learning
+
+")
+  }
+  if(doCochran) {
+    cat("Cochran, W. G.  1977.  *Sampling techniques*. 3rd edition.  John Wiley and Sons, New York.
+
+")
+  }
+  if(doGoodman) {
+    cat("Goodman, L.A., 1960. On the exact variance of products. *Journal of the American statistical association, 55*(292), pp.708-713.
+
+")
+  }
+  if(doMood) {
+    cat("Mood, A. M., F. A. Graybill, and D. C. Boes.  1974.  *Introduction to the theory of statistics*. 3rd edition.  McGraw-Hill Book Co., New York.
+
+")
+  }
+  print(citation(), style="text")
+  cat("\n")
+  print(citation("dsftools"), style="text")
+  cat("\n")
+  print(citation("knitr"), style="text")
 }
-# ASL_boilerplate(data=c("age","length"), stratified=T, abundance="known")
+# ASL_boilerplate(data=c("age","length"), stratified=F, abundance="known", species="sockeye salmon")
+# ASL_boilerplate(data=c("length"), stratified=T, abundance="unknown")
+# ASL_boilerplate(data=c("age"), stratified=T, abundance="unknown")
+
+
+
 
 # ASL_boilerplate(age=sim_data$data$age,
 #           length=sim_data$data$length,

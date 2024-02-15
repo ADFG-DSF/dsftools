@@ -323,8 +323,9 @@ and
 }
 
 \subsection{Pooled (not stratified) - If abundance is known without error}{
+\subsection{If there are proportions}{
 
-Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
+#' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 
 \deqn{\hat{p}_z=\frac{n_z}{n}}
 
@@ -357,7 +358,25 @@ if the finite population correction factor (FPC) is used, otherwise as:
 \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
 }
 
+\subsection{If there are no proportions to estimate}{
+
+The mean length of all fish will be estimated as the following, in which \eqn{x_{i}} represents the length of the \emph{i}th fish, \emph{n} represents the number of fish with an associated length measurement, and \emph{N} represents the total abundance:
+
+\deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+
+and
+
+\deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}\left(\frac{N-n}{N-1}\right)}
+
+if the finite population correction factor (FPC) is used, otherwise as:
+
+\deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
+}
+
+}
+
 \subsection{Pooled (not stratified) - If abundance is estimated with error}{
+\subsection{If there are proportions}{
 
 Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 
@@ -394,7 +413,25 @@ if the finite population correction factor (FPC) is used; otherwise as
 \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
 }
 
+\subsection{If there are no proportions to estimate}{
+
+The mean length of all fish will be estimated as the following, in which \eqn{x_{i}} represents the length of the \emph{i}th fish, \emph{n} represents the number of fish with an associated length measurement, and \eqn{\hat{N}} represents the estimated total abundance:
+
+\deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+
+and
+
+\deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}\left(\frac{\hat{N}-n}{\hat{N}-1}\right)}
+
+if the finite population correction factor (FPC) is used, otherwise as:
+
+\deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
+}
+
+}
+
 \subsection{Pooled (not stratified) - If abundance is unknown}{
+\subsection{If there are proportions}{
 
 Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
 
@@ -414,6 +451,19 @@ and
 
 \deqn{\hat{var}[\bar{x}_z]=\frac{\sum_{i=1}^{n_z}(x_{zi}-\bar{x_z})^2}{n_z(n_z-1)}}
 }
+
+\subsection{If there are no proportions to estimate}{
+
+The mean length will be estimated as the following, in which \eqn{x_{i}} denotes the length measurement associated with the \emph{i}th fish and \emph{n} denotes the number of fish with an associated length measurement:
+
+\deqn{\bar{x}=\frac{\sum_{i=1}^{n}x_{i}}{n}}
+
+and
+
+\deqn{\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}}
+}
+
+}
 }
 \description{
 This function is intended to perform all the necessary calculations
@@ -431,6 +481,10 @@ abundance, and associated Lengths (as available).
 
 Generally, \code{NULL} values in a given data vector indicate that the vector will
 not be used.
+
+Methods are also described in the document found here:
+
+\verb{https://github.com/ADFG-DSF/dsftools/blob/main/addl_documentation/asl_equations.Rmd}
 }
 \examples{
 ### a look at input

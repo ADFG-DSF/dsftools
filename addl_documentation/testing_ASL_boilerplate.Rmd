@@ -1,0 +1,26 @@
+---
+title: "Testing the `ASL_boilerplate` function"
+output: word_document
+---
+
+```{r, results='asis', echo=FALSE}
+library(dsftools)
+
+for(idata in 1:3) {
+  if(idata==1) thedata <- c("age","length")
+  if(idata==2) thedata <- c("age")
+  if(idata==3) thedata <- c("length")
+  for(istratified in c(TRUE, FALSE)) {
+    for(iabundance in c("known","estimated","unknown")) {
+      cat("##",thedata,"\n","\n")
+      cat("##",ifelse(istratified, "stratified","pooled"),"\n","\n")
+      cat("##",iabundance,"\n","\n")
+      
+      ASL_boilerplate(data=thedata, stratified=istratified, abundance=iabundance)
+      
+      cat("\n","\n","\\pagebreak","\n","\n")
+    }
+  }
+}
+
+```

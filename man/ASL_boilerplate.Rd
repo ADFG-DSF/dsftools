@@ -64,6 +64,10 @@ This can be done two ways:
 \item (1) Directly from arguments \verb{stratified=}, \verb{abundance=}, and \verb{data=} (see argument description below)
 \item (2) From possible inputs to \link{ASL_table}.  This method is provided for convenience.
 }
+
+Text and equations are taken directly from the document found here:
+
+\verb{https://github.com/ADFG-DSF/dsftools/blob/main/addl_documentation/asl_equations.Rmd}
 }
 \examples{
 \dontrun{
