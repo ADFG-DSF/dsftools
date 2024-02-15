@@ -1969,7 +1969,9 @@ $$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}\\left(
         cat("
 The total abundance by ",
 agesex,
-" category in each sampling stratum will be estimated as follows:
+" category in each sampling stratum will be estimated as follows")
+        if(!doFPCprop) cat(", in which $N_t$ represents the total abundance of ",species," in sampling stratum *t*")
+        cat(":
 
 $$\\hat{N}_{tz}=N_t\\hat{p}_{tz}$$
 
@@ -2048,19 +2050,22 @@ cat("The mean length for each sampling stratum will be estimated as follows, whe
 
 $$\\bar{x}_{t}=\\frac{\\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}$$
 
-The sampling variance of $\\bar{x}_{t}$ will be estimated as
-")
+The sampling variance of $\\bar{x}_{t}$ will be estimated as")
         if(doFPCmean) {
-          cat("
+          cat(" the following, in which $N_t$ represents the abundance associated with sampling stratum $t$:
+
 $$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\\left(\\frac{N_{t}-n_{t}}{N_{t}-1}\\right)$$
 ")
         } else {
           cat("
+
 $$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
 ")
         }
         cat("
-Stratified estimates of mean length will be calculated as follows, in which $N_t$ represents the abundance associated with sampling stratum $t$, $N$ represents the total abundance, and *L* represents the number of sampling strata:
+Stratified estimates of mean length will be calculated as follows, in which ")
+        if(!doFPCmean) cat("$N_t$ represents the abundance associated with sampling stratum $t$, ")
+        cat("$N$ represents the total abundance, and *L* represents the number of sampling strata:
 
 $$\\bar{x}=\\frac{1}{N}\\sum_{t=1}^L N_t\\bar{x}_t$$
 
@@ -2078,9 +2083,9 @@ $$\\hat{p}_{tz}=\\frac{n_{tz}}{n_t}$$
 
 in which $n_{tz}$ equals the number of ", species, " sampled during sampling stratum $t$ classified as ", agesex, " category $z$, and $n_t$ equals the number of ", species, " sampled for ", agesex, " determination within sampling stratum $t$.
 
-The sampling variance of $\\hat{p}_{tz}$ will be estimated as the following (Cochran 1977) in which $\\hat{N}_t$ is the estimated abundance of ", species, " in sampling stratum $t$:")
+The sampling variance of $\\hat{p}_{tz}$ will be estimated as the following (Cochran 1977)")
         if(doFPCprop) {
-          cat("
+          cat(" in which $\\hat{N}_t$ is the estimated abundance of ", species, " in sampling stratum $t$:
 
 $$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}\\left(\\frac{\\hat{N}_t-n_t}{\\hat{N}_t-1}\\right)$$
 ")
@@ -2092,7 +2097,9 @@ $$\\hat{var}[\\hat{p}_{tz}]=\\frac{\\hat{p}_{tz}(1-\\hat{p}_{tz})}{n_t-1}$$")
         doCasella <- TRUE
 cat("
 
-The total abundance by ", agesex, " category in each sampling stratum will be estimated as follows:
+The total abundance by ", agesex, " category in each sampling stratum will be estimated as follows")
+if(!doFPCprop) cat(", in which $\\hat{N}_t$ represents the estimated abundance of ",species," in sampling stratum *t*")
+cat(":
 
 $$\\hat{N}_{tz}=\\hat{N}_t\\hat{p}_{tz}$$
 
@@ -2161,19 +2168,27 @@ cat("The mean length for each sampling stratum will be estimated as follows, whe
 
 $$\\bar{x}_{t}=\\frac{\\sum_{i=1}^{n_{t}}x_{ti}}{n_{t}}$$
 
-The sampling variance of $\\bar{x}_{t}$ will be estimated as
-
-")
+The sampling variance of $\\bar{x}_{t}$ will be estimated as")
 if(doFPCmean) {
-  cat("$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\\left(\\frac{\\hat{N}_{t}-n_{t}}{\\hat{N}_{t}-1}\\right)$$
+  cat("the following, in which $\\hat{N}_t$ represents the estimated abundance associated with stratum *t*:
+
+$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}\\left(\\frac{\\hat{N}_{t}-n_{t}}{\\hat{N}_{t}-1}\\right)$$
 
 ")
 } else {
-  cat("$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
+  cat("
+
+$$\\hat{var}[\\bar{x}_{t}]=\\frac{\\sum_{i=1}^{n_{t}}(x_{ti}-\\bar{x}_{t})^2}{n_{t}(n_{t}-1)}$$
 
 ")
   }
-cat("Stratified estimates of mean length will be calculated as follows, in which $\\hat{N}_t$ and $\\bar{x}_t$ represent the estimated abundance and mean length associated with stratum *t*, respectively:
+cat("Stratified estimates of mean length will be calculated as follows, in which ")
+if(doFPCmean) {
+    cat("$\\bar{x}_t$ represents the mean length associated with stratum *t*")
+  } else {
+    cat("$\\hat{N}_t$ and $\\bar{x}_t$ represent the estimated abundance and mean length associated with stratum *t*, respectively")
+  }
+cat(":
 
 $$\\bar{x}=\\frac{\\sum_{t=1}^L \\hat{N}_t\\bar{x}_t}{\\sum_{t=1}^L \\hat{N}_t}$$
 
@@ -2272,9 +2287,13 @@ and
 
 ")
           }
-        cat("in which $n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, $n$ denotes the total number of ", species, " sampled, and *N* denotes the total abundance.
+        cat("in which ")
+        if(doFPCprop) cat("*N* denotes the total abundance, ")
+        cat("$n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, and $n$ denotes the total number of ", species, " sampled.
 
-Total abundance for ", agesex, " category $z$ will be estimated as
+Total abundance for ", agesex, " category $z$ will be estimated as")
+        if(!doFPCprop) cat(" the following, in which *N* denotes the total abundance:")
+        cat("
 
 $$\\hat{N}_z=N\\hat{p}_z$$
 
@@ -2300,7 +2319,10 @@ and
             }
         }
       } else {  # no proportions
-        cat("The mean length of all ", species, " will be estimated as the following, in which $x_{i}$ represents the length of the *i*th ", species, ", $n$ represents the number of ", species, " with an associated length measurement, and *N* represents the total abundance:
+        cat("The mean length of all ", species, " will be estimated as the following, in which ")
+        if(doFPCmean) cat("*N* represents the total abundance, ")
+        cat("$x_{i}$ represents the length of the *i*th ", species, ", and $n$ represents the number of ", species, " with an associated length measurement:")
+        cat("
 
 $$\\bar{x}=\\frac{\\sum_{i=1}^{n}x_{i}}{n}$$
 
@@ -2335,9 +2357,13 @@ and
 
 ")
             }
-        cat("in which $n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, $n$ denotes the total number of ", species, " sampled, and $\\hat{N}$ denotes the estimated abundance.
+        cat("in which ")
+        if(doFPCprop) cat("$\\hat{N}$ denotes the estimated abundance, ")
+        cat("$n_z$ denotes the number of ", species, " sampled in ", agesex, " category $z$, and $n$ denotes the total number of ", species, " sampled.
 
-Total abundance for ", agesex, " category $z$ will be estimated as follows (Goodman 1960):
+Total abundance for ", agesex, " category $z$ will be estimated as follows (Goodman 1960)")
+        if(!doFPCprop) cat(" in which $\\hat{N}$ denotes the estimated abundance:")
+        cat("
 
 $$\\hat{N}_z=\\hat{N}\\hat{p}_z$$
 
@@ -2363,7 +2389,9 @@ and
             }
         }
       } else {  # no proportions
-        cat("The mean length of all ", species, " will be estimated as the following, in which $x_{i}$ represents the length of the *i*th ", species, ", $n$ represents the number of ", species, " with an associated length measurement, and $\\hat{N}$ represents the estimated total abundance:
+        cat("The mean length of all ", species, " will be estimated as the following, in which ")
+        if(doFPCmean) cat("$\\hat{N}$ represents the estimated total abundance, ")
+        cat("$x_{i}$ represents the length of the *i*th ", species, ", and $n$ represents the number of ", species, " with an associated length measurement:
 
 $$\\bar{x}=\\frac{\\sum_{i=1}^{n}x_{i}}{n}$$
 
