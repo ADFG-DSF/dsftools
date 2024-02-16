@@ -3,6 +3,8 @@ title: "Testing the `ASL_boilerplate` function"
 output: word_document
 ---
 
+# Direct Input
+
 ```{r, results='asis', echo=FALSE}
 library(dsftools)
 
@@ -16,13 +18,71 @@ for(idata in 1:3) {
       cat("##",ifelse(istratified, "stratified","pooled"),"\n","\n")
       cat("##",iabundance,"\n","\n")
 
-      ASL_boilerplate(data=thedata, 
-                      stratified=istratified, 
+      ASL_boilerplate(data=thedata,
+                      stratified=istratified,
                       abundance=iabundance,
-                      FPC="never")
+                      FPC="never",
+                      tense="past")
 
       cat("\n","\n","\\pagebreak","\n","\n")
     }
   }
 }
+
+```
+
+\pagebreak
+
+# From Data
+
+```{r, results='asis', echo=FALSE}
+for(idata in 1:3) {
+  if(idata==1) thedata <- c("age","length")
+  if(idata==2) thedata <- c("age")
+  if(idata==3) thedata <- c("length")
+  for(istratified in c(TRUE, FALSE)) {
+    for(iabundance in c("known","estimated","unknown")) {
+      cat("##",thedata,"\n","\n")
+      cat("##",ifelse(istratified, "stratified","pooled"),"\n","\n")
+      cat("##",iabundance,"\n","\n")
+
+      if(idata==1) {
+        theage <- sim_data$data$age
+        thelength <- sim_data$data$length
+      }
+      if(idata==2) {
+        theage <- sim_data$data$age
+        thelength <- NULL
+      }
+      if(idata==3) {
+        theage <- NULL
+        thelength <- sim_data$data$length
+      }
+      if(istratified) {
+        thestratum <- sim_data$data$stratum
+      } else {
+        thestratum <- NULL
+      }
+      if(iabundance %in% c("known", "estimated")) {
+        theNhat <- sim_data$abundance$Nhat
+      } else {
+        theNhat <- NULL
+      }
+      if(iabundance == "estimated") {
+        theSe_nhat <- sim_data$abundance$se_Nhat
+      } else {
+        theSe_nhat <- NULL
+      }
+      ASL_boilerplate(age=theage,
+                      length=thelength,
+                      stratum=thestratum,
+                      Nhat=theNhat,
+                      se_Nhat=theSe_nhat)
+
+      cat("\n","\n","\\pagebreak","\n","\n")
+    }
+  }
+}
+
+
 ```

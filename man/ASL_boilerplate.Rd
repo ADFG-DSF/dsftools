@@ -72,11 +72,23 @@ Text and equations are taken directly from the document found here:
 \examples{
 \dontrun{
 
-## An example Rmarkdown code chunk might look like the following:
+## An example Rmarkdown code chunk might look like the following, if
+## text is to be created from direct input
 
 ```{r, results='asis', echo=FALSE}
 library(dsftools)
 ASL_boilerplate(data=c("age", "length"), stratified=TRUE, abundance="known")
+```
+
+## Alternately, an Rmarkdown code chunk might look like the following, if
+## text is to be created from data
+
+```{r, results='asis', echo=FALSE}
+library(dsftools)
+ASL_boilerplate(age = sim_data$data$age,
+                length = sim_data$data$length,
+                stratum = sim_data$data$stratum,
+                Nhat = sim_data$abundance$Nhat)
 ```
 }
 }
