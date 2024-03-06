@@ -14,7 +14,7 @@ Numeric vector
 }
 \description{
 Logit, defined as
-\deqn{log\left(\frac{x}{1-x}\right)}
+\eqn{log\left(\frac{x}{1-x}\right)}
 }
 \examples{
 logit(0.5)

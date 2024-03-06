@@ -15,7 +15,7 @@ Numeric vector
 \description{
 Inverse logit, where logit is defined as \eqn{log\left(\frac{x}{1-x}\right)}.
 
-Expit (inverse logit) is defined as \deqn{\frac{exp(x)}{1+exp(x)}}
+Expit (inverse logit) is defined as \eqn{\frac{exp(x)}{1+exp(x)}}
 }
 \examples{
 expit(0)

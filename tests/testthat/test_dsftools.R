@@ -491,3 +491,14 @@ test_that("verify_ASL_table", {
 # for(case_i in cases) {
 #   verify_ASL_table(case=case_i, nsim=10, verbose=FALSE)
 # }
+
+test_that("logit, expit, se", {
+  expect_equal(sum(logit(seq(0.5, 0.99, by=0.01))), 66.09069, tolerance = 0.00001)
+  expect_equal(sum(expit(seq(0.5, 0.99, by=0.01))), 33.86414, tolerance = 0.00001)
+  expect_equal(sum(is.na(logit(c(seq(from=0.01, to=0.99, by=0.01), NA)))), 1)
+  expect_equal(sum(!is.na(logit(c(seq(from=0.01, to=0.99, by=0.01), NA)))), 99)
+  expect_equal(sum(is.na(expit(c(seq(from=-5, to=5, by=0.1), NA)))), 1)
+  expect_equal(sum(!is.na(expit(c(seq(from=-5, to=5, by=0.1), NA)))), 101)
+  expect_equal(se(c(8, 6, 7, 5, 3, 0, 9, NA), na.rm=TRUE), 1.172241, tolerance = 0.00001)
+  expect_true(is.na(se(c(8, 6, 7, 5, 3, 0, 9, NA))))
+})

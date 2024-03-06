@@ -34,6 +34,7 @@ devtools::install_github("ADFG-DSF/dsftools")
 #### Miscellaneous functions
 
 * `logit()` and `expit()`: functions for logit and inverse-logit
+* `se()`: standard error, defined as sd/sqrt(n)
 
 ## What is an R package, and why is `dsftools` structured like one?
 
