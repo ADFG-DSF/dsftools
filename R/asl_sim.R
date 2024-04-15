@@ -54,13 +54,39 @@
 #' `ASL_table()`.  Defaults to `TRUE`.
 #' @param print_table Whether to print an example output table from `ASL_table()`
 #' as an additional check.  Defaults to `FALSE`.
-#' @return `NULL`
+#' @return FILL THIS IN!!!
 #' @author Matt Tyers
-#' @seealso [ASL_table]
+#' @seealso [rp_ASL_table], [verify_ASL_table], [ASL_table]
 #' @examples
-#' par(mfrow=c(2,2))
-#' verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
+#' ## creating a simulation object using case=
+#' simresults <- simulate_ASL_table(case="stratified_witherror_lengthage",
+#'                                  nsim=1000, plot_pop=FALSE)
 #'
+#' ## creating a simulation object using simulation parameters
+#' simresults <- simulate_ASL_table(nstrata = 4,
+#'                                  nage = 5,
+#'                                  nt = c(100, 100, 100, 100), # sample size for each stratum
+#'                                  Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
+#'                                  se_Nt = 0.2*c(10000, 20000, 30000, 40000), # (possible) SE for abundance by stratum
+#'                                  mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
+#'                                  sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
+#'                                  ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+#'                                                 c(1,2,5,5,2),
+#'                                                 c(2,5,3,2,1),
+#'                                                 c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5),
+#'                                  plot_pop=FALSE)
+#'
+#' ## running rp_ with the object created
+#' par(mfrow=c(2,2))
+#' rp_ASL_table(simresults)
+#'
+#' ## running rp_ again
+#' par(mfrow=c(2,2))
+#' rp_ASL_table(simresults, conf_target=0.99)
+#'
+#' ## running verify_
+#' par(mfrow=c(3,2))
+#' verify_ASL_table(simresults)
 #'
 #' \dontrun{
 #' nsim <- 5000
@@ -1099,6 +1125,7 @@ verify_ASL_table <- function(sim=NULL,
 #' @return `NULL`
 #' @author Matt Tyers
 #' @seealso [ASL_table]
+#' @importFrom graphics abline lines
 #' @examples
 #' par(mfrow=c(2,2))
 #' verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
