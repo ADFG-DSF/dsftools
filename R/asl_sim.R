@@ -886,7 +886,7 @@ ptz = 1:5
     outlist$mn_length_sim <- as.matrix(results[,,dimnames(results)[[3]]=="mn_length"])
     outlist$mn_length_true <- mn_length
 
-    outlist$se_mn_length_sim <- results[,,dimnames(results)[[3]]=="se_length"]
+    outlist$se_mn_length_sim <- as.matrix(results[,,dimnames(results)[[3]]=="se_length"])
     outlist$se_mn_length_true <- apply(outlist$mn_length_sim, 2, sd, na.rm=TRUE)
 
   }

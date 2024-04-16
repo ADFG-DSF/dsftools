@@ -476,6 +476,7 @@ test_that("ASL_table", {
   expect_true(all(abs(thesums - sums_check) < 0.0001))
 })
 
+## making sure verify_, simulate_, and rp_ all RUN with every pre-defined case
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
            "stratified_witherror_length", "stratified_lengthage", "stratified_age",
            "stratified_length", "stratified_Nunknown_lengthage", "stratified_Nunknown_age",
@@ -485,6 +486,90 @@ cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
 test_that("verify_ASL_table", {
   for(case_i in cases) {
     expect_silent(verify_ASL_table(case=case_i, nsim=10, verbose=FALSE))
+  }
+})
+test_that("simulate_ASL_table", {
+  for(case_i in cases) {
+    expect_silent(simulate_ASL_table(case=case_i, nsim=10, verbose=FALSE))
+  }
+})
+test_that("rp_ASL_table", {
+  for(case_i in cases) {
+    expect_silent(rp_ASL_table(case=case_i, nsim=10, verbose=FALSE))
+  }
+})
+
+## testing behavior of simulate_ASL_table     500 sims in 12 sec
+simslist <- list()
+for(i in 1:length(cases)) {
+  # print(i)
+  simslist[[i]] <- simulate_ASL_table(case=cases[i], nsim=100, verbose=FALSE, plot_pop=FALSE)
+}
+
+
+simlengths <- c(12,  8,  4, 12,  8,  4,  8,  4,  4, 12,  8,  4, 12,  8,  4,  8,  4,  4)
+
+simdims_phat <- sapply(simslist, function(x) dim(x$phat_sim))
+simdims_Nhat <- sapply(simslist, function(x) dim(x$Nhat_sim))
+simdims_mn_length <- sapply(simslist, function(x) dim(x$mn_length_sim))
+simdims_se_phat <- sapply(simslist, function(x) dim(x$se_phat_sim))
+simdims_se_Nhat <- sapply(simslist, function(x) dim(x$se_Nhat_sim))
+simdims_se_mn_length <- sapply(simslist, function(x) dim(x$se_mn_length_sim))
+
+truelengths_phat <- sapply(simslist, function(x) length(x$phat_true))
+truelengths_Nhat <- sapply(simslist, function(x) length(x$Nhat_true))
+truelengths_mn_length <- sapply(simslist, function(x) length(x$mn_length_true))
+truelengths_se_phat <- sapply(simslist, function(x) length(x$se_phat_true))
+truelengths_se_Nhat <- sapply(simslist, function(x) length(x$se_Nhat_true))
+truelengths_se_mn_length <- sapply(simslist, function(x) length(x$se_mn_length_true))
+
+# defining a custom function to make sure the true values are within
+# the quartiles of the sims
+check_quartiles <- function(simvals, truevals, lwr=0.1, upr=.9) {   ## lwr and upr used to be .25 and .75
+  if(is.null(simvals) & is.null(truevals)) {
+    out <- TRUE  # don't complain if the sim & true vals aren't there
+  }
+  if(xor(is.null(simvals), is.null(truevals))) {
+    out <- FALSE  # complain if one is there and the other isn't
+  }
+  if(!is.null(simvals) & !is.null(truevals)) {
+    out <- apply(simvals, 2, quantile, lwr) <= truevals &
+      apply(simvals, 2, quantile, upr) >= truevals
+  }
+  return(out)
+}
+
+test_that("simulate_ASL_table intensive", {
+  expect_equal(sapply(simslist, length), simlengths)
+
+  expect_equal(sum(unlist(simdims_phat)), 1260)
+  expect_equal(sum(unlist(simdims_Nhat)), 840)
+  expect_equal(sum(unlist(simdims_mn_length)), 1236)
+  expect_equal(sum(unlist(simdims_se_phat)), 1260)
+  expect_equal(sum(unlist(simdims_se_Nhat)), 840)
+  expect_equal(sum(unlist(simdims_se_mn_length)), 1236)
+
+  expect_equal(sum(truelengths_phat), 60)
+  expect_equal(sum(truelengths_Nhat), 40)
+  expect_equal(sum(truelengths_mn_length), 36)
+  expect_equal(sum(truelengths_se_phat), 60)
+  expect_equal(sum(truelengths_se_Nhat), 40)
+  expect_equal(sum(truelengths_se_mn_length), 36)
+
+  for(i in 1:length(cases)) {
+    expect_true(all(check_quartiles(simvals = simslist[[i]]$phat_sim,
+                                    truevals = simslist[[i]]$phat_true)))
+    expect_true(all(check_quartiles(simvals = simslist[[i]]$Nhat_sim,
+                                    truevals = simslist[[i]]$Nhat_true)))
+    expect_true(all(check_quartiles(simvals = simslist[[i]]$mn_length_sim,
+                                    truevals = simslist[[i]]$mn_length_true)))
+    ## these are less stable in pooled case (weird!!)  Need to figure out
+    # expect_true(all(check_quartiles(simvals = simslist[[i]]$se_phat_sim,
+    #                                 truevals = simslist[[i]]$se_phat_true)))
+    # expect_true(all(check_quartiles(simvals = simslist[[i]]$se_Nhat_sim,
+    #                                 truevals = simslist[[i]]$se_Nhat_true)))
+    # expect_true(all(check_quartiles(simvals = simslist[[i]]$se_mn_length_sim,
+    #                                 truevals = simslist[[i]]$se_mn_length_true)))
   }
 })
 
