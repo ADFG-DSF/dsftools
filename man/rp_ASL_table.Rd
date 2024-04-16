@@ -107,23 +107,72 @@ and mean length (mn_length), depending on which are present.  Multiple curves
 will be overlayed for each, if multiple categories are present for Age and/or Sex.
 }
 \examples{
+# running rp_ using a pre-defined case
 par(mfrow=c(2,2))
-verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
+rp_ASL_table(case="stratified_witherror_lengthage",
+             nsim=500, plot_pop=FALSE)
+
+# running rp_ directly from simulation parameters
+par(mfrow=c(2,2))
+rp_ASL_table(nstrata = 4,
+             nage = 5,
+
+             # sample size for each stratum
+             nt = c(100, 100, 100, 100),
+
+             # abundance for each stratum
+             Nt = c(10000, 20000, 30000, 40000),
+
+             # (possible) SE for abundance by stratum
+             se_Nt = 0.2*c(10000, 20000, 30000, 40000),
+
+             # mean length FOR EACH AGE
+             mn_length = c(150, 200, 250, 300, 350),
+
+             # sd length FOR EACH AGE
+             sd_length = c(40, 50, 60, 70, 80),
+
+             # matrix of probabilities of each age BY stratum
+             ptz = matrix(c(c(1,2,3,4,5),
+                            c(1,2,5,5,2),
+                            c(2,5,3,2,1),
+                            c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5),
+             nsim=500, plot_pop=FALSE)
 
 
-\dontrun{
-nsim <- 5000
-cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
-"stratified_witherror_length", "stratified_lengthage", "stratified_age",
-"stratified_length", "stratified_Nunknown_lengthage", "stratified_Nunknown_age",
-"stratified_Nunknown_length", "pooled_witherror_lengthage", "pooled_witherror_age",
-"pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length",
-"pooled_Nunknown_lengthage", "pooled_Nunknown_age", "pooled_Nunknown_length")
-for(case_i in cases) {
-  par(mfrow=c(3,2))
-  verify_ASL_table(case=case_i, nsim=nsim)
-}
-}
+## creating a simulation object first
+simresults <- simulate_ASL_table(nstrata = 4,
+                                 nage = 5,
+
+                                 # sample size for each stratum
+                                 nt = c(100, 100, 100, 100),
+
+                                 # abundance for each stratum
+                                 Nt = c(10000, 20000, 30000, 40000),
+
+                                 # (possible) SE for abundance by stratum
+                                 se_Nt = 0.2*c(10000, 20000, 30000, 40000),
+
+                                 # mean length FOR EACH AGE
+                                 mn_length = c(150, 200, 250, 300, 350),
+
+                                 # sd length FOR EACH AGE
+                                 sd_length = c(40, 50, 60, 70, 80),
+
+                                 # matrix of probabilities of each age BY stratum
+                                 ptz = matrix(c(c(1,2,3,4,5),
+                                                c(1,2,5,5,2),
+                                                c(2,5,3,2,1),
+                                                c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5),
+                                 plot_pop=FALSE)
+
+## running rp_ with the object created
+par(mfrow=c(2,2))
+rp_ASL_table(sim=simresults)
+
+## running rp_ again
+par(mfrow=c(2,2))
+rp_ASL_table(sim=simresults, conf_target=0.99)
 }
 \seealso{
 \link{ASL_table}

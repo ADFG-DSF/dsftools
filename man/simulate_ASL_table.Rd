@@ -15,7 +15,7 @@ simulate_ASL_table(
   mn_length = NULL,
   sd_length = NULL,
   ptz = NULL,
-  nNA = 10,
+  nNA = 0,
   nsim = 1000,
   plot_pop = TRUE,
   verbose = TRUE,
@@ -59,7 +59,7 @@ is not required.  If a pooled (non-stratified) sample is to be taken and
 age categories are to be considered, this should be supplied as a vector with
 length equal to the number of ages.}
 
-\item{nNA}{Number of NA values to randomly impute, to test robustness to NA.  Defaults to \code{10}.}
+\item{nNA}{Number of NA values to randomly impute, to test robustness to NA.  Defaults to \code{0}.}
 
 \item{nsim}{Number of simulated replicates.  Defaults to \code{1000}, but more is recommended.}
 
@@ -75,7 +75,9 @@ if one of the \code{case}s is accepted, as well as printing the method used with
 as an additional check.  Defaults to \code{FALSE}.}
 }
 \value{
-FILL THIS IN!!!
+An object of class \code{"ASL_sim"}, which is a list of matrices of
+simulation samples, and vectors of the associated
+true values.  Details are described above.
 }
 \description{
 This function is called internally within
@@ -101,51 +103,91 @@ and/or numeric (length) values is to be performed.  In general:
 It should be noted that a small but non-trival number of entries for age,
 length, and stratum are imputed as \code{NA} by default (see \verb{nNA=} argument) in order
 to test function robustness to missing data.
+
+A list will be returned, with matrices of simulation samples and associated
+true values.  This will consist of some subset of the following, as appropriate:
+\itemize{
+\item Proportions
+\itemize{
+\item \verb{$phat_sim}: A matrix of simulated proportion estimates, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$phat_true}: A vector of true proportions.  This is calculated from simulation
+inputs \code{Nt} or \code{ptz} and \code{stratum_weights} as appropriate.
+\item \verb{$se_phat_sim}: A matrix of simulated proportion standard errors, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$se_phat_true}: A vector of standard errors, calculated empirically from
+the simulated values \verb{$phat_sim} thereby approximating the sampling distribution.
+}
+\item Abundances
+\itemize{
+\item \verb{$Nhat_sim}: A matrix of simulated abundance estimates, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$Nhat_true}: A vector of true abundances, given by user inputs \code{Nt}.
+\item \verb{$se_Nhat_sim}: A matrix of simulated abundance standard errors, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$se_Nhat_true}: A vector of standard errors, calculated empirically from
+the simulated values \verb{$Nhat_sim} thereby approximating the sampling distribution.
+}
+\item Mean Lengths
+\itemize{
+\item \verb{$mn_length_sim}: A matrix of simulated mean length estimates, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$mn_length_true}: A vector of true mean lengths, given by user inputs \code{mn_length}.
+\item \verb{$se_mn_length_sim}: A matrix of simulated mean length standard errors, with columns corresponding
+to categories and rows corresponding to simulation samples.  This is calculated
+via the relevant methods used by \code{ASL_table()}.
+\item \verb{$se_mn_length_true}: A vector of standard errors, calculated empirically from
+the simulated values \verb{$mn_length_sim} thereby approximating the sampling distribution.
+}
+}
 }
 \examples{
 ## creating a simulation object using case=
 simresults <- simulate_ASL_table(case="stratified_witherror_lengthage",
-                                 nsim=1000, plot_pop=FALSE)
+                                 nsim=500, plot_pop=FALSE)
 
 ## creating a simulation object using simulation parameters
 simresults <- simulate_ASL_table(nstrata = 4,
                                  nage = 5,
-                                 nt = c(100, 100, 100, 100), # sample size for each stratum
-                                 Nt = c(10000, 20000, 30000, 40000),  # abundance for each stratum
-                                 se_Nt = 0.2*c(10000, 20000, 30000, 40000), # (possible) SE for abundance by stratum
-                                 mn_length = c(150, 200, 250, 300, 350), # mean length FOR EACH AGE
-                                 sd_length = c(40, 50, 60, 70, 80), # sd length FOR EACH AGE
-                                 ptz = matrix(c(c(1,2,3,4,5),  # matrix of probabilities of each age BY stratum
+
+                                 # sample size for each stratum
+                                 nt = c(100, 100, 100, 100),
+
+                                 # abundance for each stratum
+                                 Nt = c(10000, 20000, 30000, 40000),
+
+                                 # (possible) SE for abundance by stratum
+                                 se_Nt = 0.2*c(10000, 20000, 30000, 40000),
+
+                                 # mean length FOR EACH AGE
+                                 mn_length = c(150, 200, 250, 300, 350),
+
+                                 # sd length FOR EACH AGE
+                                 sd_length = c(40, 50, 60, 70, 80),
+
+                                 # matrix of probabilities of each age BY stratum
+                                 ptz = matrix(c(c(1,2,3,4,5),
                                                 c(1,2,5,5,2),
                                                 c(2,5,3,2,1),
                                                 c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5),
-                                 plot_pop=FALSE)
+                                 nsim=500, plot_pop=FALSE)
 
 ## running rp_ with the object created
 par(mfrow=c(2,2))
-rp_ASL_table(simresults)
+rp_ASL_table(sim=simresults)
 
 ## running rp_ again
 par(mfrow=c(2,2))
-rp_ASL_table(simresults, conf_target=0.99)
+rp_ASL_table(sim=simresults, conf_target=0.99)
 
 ## running verify_
 par(mfrow=c(3,2))
-verify_ASL_table(simresults)
-
-\dontrun{
-nsim <- 5000
-cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
-"stratified_witherror_length", "stratified_lengthage", "stratified_age",
-"stratified_length", "stratified_Nunknown_lengthage", "stratified_Nunknown_age",
-"stratified_Nunknown_length", "pooled_witherror_lengthage", "pooled_witherror_age",
-"pooled_witherror_length", "pooled_lengthage", "pooled_age", "pooled_length",
-"pooled_Nunknown_lengthage", "pooled_Nunknown_age", "pooled_Nunknown_length")
-for(case_i in cases) {
-  par(mfrow=c(3,2))
-  verify_ASL_table(case=case_i, nsim=nsim)
-}
-}
+verify_ASL_table(sim=simresults)
 }
 \seealso{
 \link{rp_ASL_table}, \link{verify_ASL_table}, \link{ASL_table}

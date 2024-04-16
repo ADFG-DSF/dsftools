@@ -120,10 +120,44 @@ length, and stratum are imputed as \code{NA} by default (see \verb{nNA=} argumen
 to test function robustness to missing data.
 }
 \examples{
+# running using a pre-defined case
 par(mfrow=c(2,2))
-verify_ASL_table(case="stratified_witherror_lengthage", nsim=1000)
+verify_ASL_table(case="stratified_witherror_lengthage", nsim=500)
+
+# running using simulation parameters directly
+par(mfrow=c(2,2))
+verify_ASL_table(nstrata = 4,
+                 nage = 5,
+
+                 # sample size for each stratum
+                 nt = c(100, 100, 100, 100),
+
+                 # abundance for each stratum
+                 Nt = c(10000, 20000, 30000, 40000),
+
+                 # (possible) SE for abundance by stratum
+                 se_Nt = 0.2*c(10000, 20000, 30000, 40000),
+
+                 # mean length FOR EACH AGE
+                 mn_length = c(150, 200, 250, 300, 350),
+
+                 # sd length FOR EACH AGE
+                 sd_length = c(40, 50, 60, 70, 80),
+
+                 # matrix of probabilities of each age BY stratum
+                 ptz = matrix(c(c(1,2,3,4,5),
+                                c(1,2,5,5,2),
+                                c(2,5,3,2,1),
+                                c(5,4,3,1,1)), byrow=TRUE, nrow=4, ncol=5),
+                 nsim=1000)
+
+# simulating first, then running
+par(mfrow=c(2,2))
+simresults <- simulate_ASL_table(case="stratified_witherror_lengthage", nsim=500)
+verify_ASL_table(simresults)
 
 
+# all pre-defined cases
 \dontrun{
 nsim <- 5000
 cases <- c("stratified_witherror_lengthage", "stratified_witherror_age",
