@@ -28,7 +28,9 @@ devtools::install_github("ADFG-DSF/dsftools")
 #### For ASL (age, sex, and length) summaries:
 
 * `ASL_table()` generates a summary table of ASL from vectors of data, and is robust to multiple sampling scenarios (stratified vs. pooled, total abundance known vs. estimated vs. unknown).
-  - `verify_ASL_table()` provides a graphical check of the methods used in `ASL_table()` via simulation.
+* `verify_ASL_table()` provides a graphical check of the methods used in `ASL_table()` via simulation.
+* `rp_ASL_table()` graphically describes the relative precision of the estimates returned by `ASL_table()` via simulation.
+* `simulate_ASL_table()` is the simulation function that may be called by `verify_` and `rp_`, but may be called by itself.
 * `ASL_boilerplate()` automagically creates text to accompany an ASL summary analysis or Operational Plan, to be written to Rmarkdown.  This function may be used with inputs to `ASL_table()`, or directly from inputs describing the sampling scenario.
   
 #### Miscellaneous functions
