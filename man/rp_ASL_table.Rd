@@ -21,7 +21,8 @@ rp_ASL_table(
   nsim = 1000,
   plot_pop = TRUE,
   verbose = TRUE,
-  print_table = FALSE
+  print_table = FALSE,
+  FPC = c("ifknown", "always", "never")
 )
 }
 \arguments{
@@ -82,6 +83,15 @@ if one of the \code{case}s is accepted, as well as printing the method used with
 
 \item{print_table}{Whether to print an example output table from \code{ASL_table()}
 as an additional check.  Defaults to \code{FALSE}.}
+
+\item{FPC}{Whether to incorporate the Finite Population Correction factor (FPC) in
+variance calculations.  Allowed values are
+\itemize{
+\item \code{"ifknown"} (the default), which will use the FPC only if abundance is known without error
+\item \code{"always"}, which will use the FPC wherever possible (i.e. if there is an estimate of abundance)
+\item \code{"never"}, which will always ignore the FPC.
+used if the abundance is considered to be known without error.
+}}
 }
 \value{
 \code{NULL}

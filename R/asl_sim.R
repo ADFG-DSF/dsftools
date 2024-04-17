@@ -88,6 +88,12 @@
 #' `ASL_table()`.  Defaults to `TRUE`.
 #' @param print_table Whether to print an example output table from `ASL_table()`
 #' as an additional check.  Defaults to `FALSE`.
+#' @param FPC Whether to incorporate the Finite Population Correction factor (FPC) in
+#' variance calculations.  Allowed values are
+#' * `"ifknown"` (the default), which will use the FPC only if abundance is known without error
+#' * `"always"`, which will use the FPC wherever possible (i.e. if there is an estimate of abundance)
+#' * `"never"`, which will always ignore the FPC.
+#' used if the abundance is considered to be known without error.
 #' @return An object of class `"ASL_sim"`, which is a list of matrices of
 #' simulation samples, and vectors of the associated
 #' true values.  Details are described above.
@@ -156,7 +162,8 @@ simulate_ASL_table <- function(case=NULL,   # should this default to NULL?
                                nsim=1000,   # 1000,    # number of simulated replicates
                                plot_pop=TRUE,   # whether to make summary plots of pop & one sample
                                verbose=TRUE, # whether to output cases in sim function
-                               print_table=FALSE) {
+                               print_table=FALSE,
+                               FPC=c("ifknown", "always", "never")) {
 
   ### pre-populate cases
   if(!is.null(case)) {
@@ -773,7 +780,8 @@ ptz = 1:5
                         Nhat=Nhat_sim,
                         stratum_weights = stratum_weights,
                         se_Nhat=se_Nt,
-                        verbose=verbose)
+                        verbose=verbose,
+                        FPC=FPC)
 
   # thetable <- ASL_table(age=age_sim[thesample],
   #                       length=length_sim[thesample],
@@ -848,7 +856,8 @@ ptz = 1:5
                           stratum=thestratum,
                           Nhat=Nhat_sim,
                           stratum_weights=stratum_weights,
-                          se_Nhat=se_Nt)  # find a way to add stratum_weights???
+                          se_Nhat=se_Nt,
+                          FPC=FPC)  # find a way to add stratum_weights???
     # results[,,i_sim] <- as.matrix(thetable)
     results[i_sim,,] <- as.matrix(thetable)
   }
@@ -970,6 +979,12 @@ ptz = 1:5
 #' `ASL_table()`.  Defaults to `TRUE`.
 #' @param print_table Whether to print an example output table from `ASL_table()`
 #' as an additional check.  Defaults to `FALSE`.
+#' @param FPC Whether to incorporate the Finite Population Correction factor (FPC) in
+#' variance calculations.  Allowed values are
+#' * `"ifknown"` (the default), which will use the FPC only if abundance is known without error
+#' * `"always"`, which will use the FPC wherever possible (i.e. if there is an estimate of abundance)
+#' * `"never"`, which will always ignore the FPC.
+#' used if the abundance is considered to be known without error.
 #' @return `NULL`
 #' @author Matt Tyers
 #' @seealso [ASL_table]
@@ -1047,7 +1062,8 @@ verify_ASL_table <- function(sim=NULL,
                               nsim=1000,   # 1000,    # number of simulated replicates
                               plot_pop=TRUE,   # whether to make summary plots of pop & one sample
                               verbose=TRUE, # whether to output cases in sim function
-                              print_table=FALSE) {
+                              print_table=FALSE,
+                             FPC=c("ifknown", "always", "never")) {
 
   ## if sim= is supplied, make sure it is actually a simulation object!
   if(!is.null(sim)) {
@@ -1075,7 +1091,8 @@ verify_ASL_table <- function(sim=NULL,
                               nsim=nsim,
                               plot_pop=plot_pop,
                               verbose=verbose,
-                              print_table=print_table)
+                              print_table=print_table,
+                              FPC=FPC)
   }
 
   ### I'm sure there's a more efficient way to use all arguments!!
@@ -1197,6 +1214,12 @@ verify_ASL_table <- function(sim=NULL,
 #' `ASL_table()`.  Defaults to `TRUE`.
 #' @param print_table Whether to print an example output table from `ASL_table()`
 #' as an additional check.  Defaults to `FALSE`.
+#' @param FPC Whether to incorporate the Finite Population Correction factor (FPC) in
+#' variance calculations.  Allowed values are
+#' * `"ifknown"` (the default), which will use the FPC only if abundance is known without error
+#' * `"always"`, which will use the FPC wherever possible (i.e. if there is an estimate of abundance)
+#' * `"never"`, which will always ignore the FPC.
+#' used if the abundance is considered to be known without error.
 #' @return `NULL`
 #' @author Matt Tyers
 #' @seealso [ASL_table]
@@ -1291,7 +1314,8 @@ rp_ASL_table <- function(conf_target=0.9,
                          nsim=1000,   # 1000,    # number of simulated replicates
                          plot_pop=TRUE,   # whether to make summary plots of pop & one sample
                          verbose=TRUE, # whether to output cases in sim function
-                         print_table=FALSE) {
+                         print_table=FALSE,
+                         FPC=c("ifknown", "always", "never")) {
 
   ## if sim= is supplied, make sure it is actually a simulation object!
   if(!is.null(sim)) {
@@ -1319,7 +1343,8 @@ rp_ASL_table <- function(conf_target=0.9,
                               nsim=nsim,
                               plot_pop=plot_pop,
                               verbose=verbose,
-                              print_table=print_table)
+                              print_table=print_table,
+                              FPC=FPC)
   }
 
   # if phat is part of the simulation results
