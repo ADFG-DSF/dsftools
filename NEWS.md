@@ -1,3 +1,9 @@
+# dsftools 0.1.2 (June 2024)
+
+Added a couple of miscellaneous functions:
+
+* `rp()` for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
+
 # dsftools 0.1.1 (Apr 2024)
 
 Split out the simulation routine in `verify_ASL_table()` and made the original

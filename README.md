@@ -37,6 +37,7 @@ devtools::install_github("ADFG-DSF/dsftools")
 
 * `logit()` and `expit()`: functions for logit and inverse-logit
 * `se()`: standard error, defined as sd/sqrt(n)
+* `rp()`: a more generalized function for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
 
 ## What is an R package, and why is `dsftools` structured like one?
 

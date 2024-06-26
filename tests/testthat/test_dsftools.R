@@ -587,3 +587,25 @@ test_that("logit, expit, se", {
   expect_equal(se(c(8, 6, 7, 5, 3, 0, 9, NA), na.rm=TRUE), 1.172241, tolerance = 0.00001)
   expect_true(is.na(se(c(8, 6, 7, 5, 3, 0, 9, NA))))
 })
+
+xx <- rnorm(n=100000, mean=10, sd=1)
+check1 <- c(0.1276836, 0.1646694, 0.1961813, 0.2573959)
+check2 <- c(0.68156, 0.95510, 0.99731)
+check3 <- c(1.277260, 1.640136, 1.954461, 2.568028)
+check4 <- c(0.07989, 0.15827, 0.23603)
+names(check1) <- names(check3) <- c('80%', '90%', '95%', '99%')
+names(check2) <- names(check4) <- c("0.1", "0.2", "0.3")
+test_that("rp", {
+  expect_equal(rp(sim_vec = xx, true_val = 10, confidence = c(0.8, 0.9, 0.95, 0.99)),
+               check1,
+               tolerance = 0.01)
+  expect_equal(rp(sim_vec = xx, true_val = 10, accuracy = c(0.1, 0.2, 0.3)),
+               check2,
+               tolerance=0.01)
+  expect_equal(rp(sim_vec = xx, true_val = 10, confidence = c(0.8, 0.9, 0.95, 0.99), relative=FALSE),
+               check3,
+               tolerance = 0.01)
+  expect_equal(rp(sim_vec = xx, true_val = 10, accuracy = c(0.1, 0.2, 0.3), relative=FALSE),
+               check4,
+               tolerance=0.01)
+})
