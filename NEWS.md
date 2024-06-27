@@ -3,6 +3,7 @@
 Added a couple of miscellaneous functions:
 
 * `rp()` for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
+* `plotcor()` for plotting a correlation matrix
 
 # dsftools 0.1.1 (Apr 2024)
 

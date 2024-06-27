@@ -609,3 +609,27 @@ test_that("rp", {
                check4,
                tolerance=0.01)
 })
+
+n <- 100
+xx <- rnorm(n, mean=10, sd=1)
+dfsim <- data.frame(a = xx + rnorm(n, sd=0.5),
+                    b = xx + rnorm(n, sd=0.5),
+                    c = xx + rnorm(n, sd=2),
+                    d = xx + rnorm(n, sd=4),
+                    e = -xx + rnorm(n, sd=2),
+                    f = -xx + rnorm(n, sd=0.5),
+                    g = -xx + rnorm(n, sd=0.5))
+dfsim2 <- dfsim3 <- dfsim
+names(dfsim2)[1:4] <- paste0("aa[", 1:4, "]")
+dfsim3[5, 5] <- NA
+
+test_that("plotcor", {
+  expect_silent(plotcor(cor(dfsim)))
+  expect_silent(plotcor(cor(dfsim), mincor=.5, legend=FALSE))
+  expect_silent(plotcor(cor(dfsim), colors=c("cornflowerblue","orange")))
+  expect_silent(plotcor(cor(dfsim2), maxn=3))
+  expect_silent(plotcor(cor(dfsim2)))
+  expect_silent(plotcor(cor(dfsim3)))
+  expect_silent(plotcor(cor(dfsim3, use="na.or.complete")))
+})
+
