@@ -1,3 +1,10 @@
+# dsftools 0.1.3 (July 2024)
+
+Added some shortcut functions for vector subsetting:
+
+* `%inside%` behaves similar to %in%, but with a numeric vector; `%inside()%`, `%inside[)%`, and `%inside(]%` allow specification of interval endpoints
+* `%s_l%, `%s_leq%, `%s_g%, `%s_geq%, `%s_inside%, `%s_inside()%, `%s_inside[)%, and `%s_inside[)% to shortcut vector subsetting
+
 # dsftools 0.1.2 (June 2024)
 
 Added a couple of miscellaneous functions:
@@ -8,7 +15,7 @@ Added a couple of miscellaneous functions:
 # dsftools 0.1.1 (Apr 2024)
 
 Split out the simulation routine in `verify_ASL_table()` and made the original
-function a wrapper.  Creation of two additional function:
+function a wrapper.  Creation of two additional functions:
 
 * `simulate_ASL_table()` specifically for the simulation portion
 * `rp_ASL_table()` for describing the relative precision of estimates via simulation

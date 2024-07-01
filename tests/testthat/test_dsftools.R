@@ -633,3 +633,25 @@ test_that("plotcor", {
   expect_silent(plotcor(cor(dfsim3, use="na.or.complete")))
 })
 
+xx1 <- rnorm(100)
+xx2 <- c(xx1, NA)
+test_that("inside", {
+  expect_equal(xx1 %inside% 1:3, (xx1 >= 1 & xx1 <= 3))
+  expect_equal(xx2 %inside% 1:3, ifelse(is.na(xx2), FALSE, (xx2 >= 1 & xx2 <= 3)))
+  expect_equal(which(1:10 %inside% 1:3), 1:3)
+  expect_equal(which(1:10 %inside()% 1:3), 2)
+  expect_equal(which(1:10 %inside[)% 1:3), 1:2)
+  expect_equal(which(1:10 %inside(]% 1:3), 2:3)
+})
+
+test_that("subsets", {
+  expect_equal(xx1 %s_l% 0, xx1[xx1 < 0])
+  expect_equal(xx1 %s_leq% 0, xx1[xx1 <= 0])
+  expect_equal(xx1 %s_g% 0, xx1[xx1 > 0])
+  expect_equal(xx1 %s_geq% 0, xx1[xx1 >= 0])
+  expect_equal(xx2 %s_l% 0, xx2[xx2 < 0])
+  expect_equal(1:10 %s_inside% 1:3, 1:3)
+  expect_equal(1:10 %s_inside()% 1:3, 2)
+  expect_equal(1:10 %s_inside[)% 1:3, 1:2)
+  expect_equal(1:10 %s_inside(]% 1:3, 2:3)
+})
