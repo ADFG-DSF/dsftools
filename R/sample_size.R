@@ -114,6 +114,7 @@ rp <- function(sim_vec, true_val,
 #' @return A single number reflecting the probability of detection.
 #' @seealso [multinomial_detection]
 #' @author Matt Tyers
+#' @importFrom stats pbinom rmultinom
 #' @examples
 #' ## The probability of detecting an area used by 5% of the population, given
 #' ## a sample size of n=100 and assuming 80% survival.

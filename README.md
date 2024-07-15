@@ -32,12 +32,17 @@ devtools::install_github("ADFG-DSF/dsftools")
 * `rp_ASL_table()` graphically describes the relative precision of the estimates returned by `ASL_table()` via simulation.
 * `simulate_ASL_table()` is the simulation function that may be called by `verify_` and `rp_`, but may be called by itself.
 * `ASL_boilerplate()` automagically creates text to accompany an ASL summary analysis or Operational Plan, to be written to Rmarkdown.  This function may be used with inputs to `ASL_table()`, or directly from inputs describing the sampling scenario.
+
+#### For sample size & relative precision statements:
+
+* `rp()`: a generalized function for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
+* `binomial_detection()` and `multinomial_detection()`: in the context of a telemetry study, estimating the probability of detecting a single area or multiple areas used by some proportion of the marked population, given the sample size of instrumented fish, assuming random sampling
+
   
 #### Miscellaneous functions
 
 * `logit()` and `expit()`: functions for logit and inverse-logit
 * `se()`: standard error, defined as sd/sqrt(n)
-* `rp()`: a more generalized function for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
 * `plotcor()`: a method for plotting a correlation matrix (mostly stolen from `jagshelper::plotcor_jags()`)
 * `%inside%`, `%inside()%`, `%inside[)%`, and `%inside(]%`: shorthand for checking if elements of a numeric vector are within a specified interval
 * `%s_l%, `%s_leq%, `%s_g%, `%s_geq%, `%s_inside%, `%s_inside()%, `%s_inside[)%, and `%s_inside[)%: shortcuts for vector subsetting
