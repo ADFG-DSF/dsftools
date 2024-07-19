@@ -1,8 +1,8 @@
 Package: dsftools
 Type: Package
 Title: Common Tools for Fisheries Analyses
-Version: 0.1.4
-Date: 2024-07-15
+Version: 0.1.5
+Date: 2024-07-19
 Author: Matt Tyers [aut, cre]
 Authors@R: person("Matt", "Tyers", email = "matt.tyers@alaska.gov",
     role = c("aut", "cre"))

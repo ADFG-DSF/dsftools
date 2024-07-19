@@ -673,3 +673,46 @@ test_that("binomial_detection and multinomial_detection", {
                multinomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)$avg_p_detected,
                tolerance = 0.002)
 })
+
+test_that("detection_probability", {
+  expect_equal(detection_probability(n_raw=100, prop_usedby = 0.05, assumed_survival = .8),
+               0.9834846, tolerance=0.000001)
+  expect_equal(detection_probability(n_raw=100, prop_usedby = 0.05, assumed_survival = .8,
+                                     model="poisson"),
+               0.9816844, tolerance=0.000001)
+  expect_error(detection_probability(n_raw=100, prop_usedby = 0.05, assumed_survival = .8,
+                                     model="steve"),
+               "model= argument must be \"binomial\" or \"poisson\"")
+  expect_equal(dim(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1))),
+               c(12, 4))
+  expect_equal(dim(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1),
+                                         simplify=FALSE)),
+               c(12, 6))
+  expect_equal(dim(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1),
+                                         prop_ofareas = c(0.9, 0.95, 0.1))),
+               c(36, 6))
+  expect_equal(dim(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1),
+                                         prop_ofareas = c(0.9, 0.95, 0.1),
+                                         simplify=FALSE)),
+               c(36, 8))
+  expect_equal(sum(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1),
+                                         prop_ofareas = c(0.9, 0.95, 0.1),
+                                         simplify=FALSE)$p_singlearea),
+               34.14197, tolerance = 0.00001)
+  expect_equal(sum(detection_probability(n_raw=c(80, 100),
+                                         prop_usedby = c(0.025, 0.05, 0.1) ,
+                                         assumed_survival = c(.8, 1),
+                                         prop_ofareas = c(0.9, 0.95, 0.1),
+                                         simplify=FALSE)$p_multipleareas),
+               29.85907, tolerance = 0.00001)
+})

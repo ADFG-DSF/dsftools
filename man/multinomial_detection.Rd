@@ -67,7 +67,7 @@ multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
                       prop_ofareas = 0.9)
 }
 \seealso{
-\link{binomial_detection}
+\link{detection_probability}
 }
 \author{
 Matt Tyers

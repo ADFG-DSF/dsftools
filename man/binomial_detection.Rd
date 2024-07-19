@@ -79,7 +79,7 @@ outer(X=n_raw_trial, Y=survival_trial,
                                            assumed_survival=Y))
 }
 \seealso{
-\link{multinomial_detection}
+\link{detection_probability}
 }
 \author{
 Matt Tyers

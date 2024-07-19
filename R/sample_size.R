@@ -112,7 +112,7 @@ rp <- function(sim_vec, true_val,
 #' detection of an area.  Defaults to `1`, but a larger number may be used as
 #' necessary, depending on criterion used to define detection of an aggregation.
 #' @return A single number reflecting the probability of detection.
-#' @seealso [multinomial_detection]
+#' @seealso [detection_probability]
 #' @author Matt Tyers
 #' @importFrom stats pbinom rmultinom
 #' @examples
@@ -200,7 +200,7 @@ binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_a
 #'
 #' * Element `$p_all_detected` gives the estimated SIMULTANEOUS detection probability
 #' of the proportion of areas specified.
-#' @seealso [binomial_detection]
+#' @seealso [detection_probability]
 #' @author Matt Tyers
 #' @examples
 #' ## The probability of detecting all areas used by 5% of the population, given

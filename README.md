@@ -36,7 +36,7 @@ devtools::install_github("ADFG-DSF/dsftools")
 #### For sample size & relative precision statements:
 
 * `rp()`: a generalized function for calculating confidence or (relative) accuracy from a vector of simulated values and a true value
-* `binomial_detection()` and `multinomial_detection()`: in the context of a telemetry study, estimating the probability of detecting a single area or multiple areas used by some proportion of the marked population, given the sample size of instrumented fish, assuming random sampling
+* `detection_probability()`: in the context of a telemetry study, estimating the probability of detecting a single area or multiple areas used by some proportion of the marked population, given the sample size of instrumented fish, assuming random sampling
 
   
 #### Miscellaneous functions

@@ -1,3 +1,11 @@
+# dsftools 0.1.5 (July 2024)
+
+Added `detection_probability()`:
+
+* In the context of a telemetry study, estimating the probability of detecting a single area or multiple areas used by some proportion of the marked population, given the sample size of instrumented fish, assuming random sampling
+
+Note that this generalizes, improves upon, and deprecates `binomial_detection()` and `multinomial_detection()`.  Oops.
+
 # dsftools 0.1.4 (July 2024)
 
 Added two functions:
