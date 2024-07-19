@@ -2,12 +2,12 @@
 % Please edit documentation in R/sample_size.R
 \name{multinomial_detection}
 \alias{multinomial_detection}
-\title{Simultaneous Detection Probability From a Given Sample Size, Assuming Multinomial}
+\title{Simultaneous Detection Probability From a Given Sample Size, Assuming Multinomial (Deprecated)}
 \usage{
 multinomial_detection(
   n_raw,
   prop_usedby,
-  assumed_survival = 0.8,
+  assumed_survival = 1,
   observe_at_least = 1,
   prop_ofareas = 1
 )

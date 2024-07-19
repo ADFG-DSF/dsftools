@@ -81,7 +81,7 @@ rp <- function(sim_vec, true_val,
 
 
 
-#' Detection Probability From a Given Sample Size, Assuming Binomial
+#' Detection Probability From a Given Sample Size, Assuming Binomial (Deprecated)
 #' @description In the context of a telemetry study, this function calculates
 #' the probability of detecting a SINGLE area used by some proportion of the marked
 #' population, given the sample size of instrumented fish, assuming a Binomial
@@ -144,6 +144,7 @@ rp <- function(sim_vec, true_val,
 #'                                            assumed_survival=Y))
 #' @export
 binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_at_least=1) {
+  .Deprecated("detection_probability")
   pbinom(q = observe_at_least-1,
          size = round(n_raw*assumed_survival),
          prob = prop_usedby,
@@ -164,7 +165,7 @@ binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_a
 
 
 
-#' Simultaneous Detection Probability From a Given Sample Size, Assuming Multinomial
+#' Simultaneous Detection Probability From a Given Sample Size, Assuming Multinomial (Deprecated)
 #' @description In the context of a telemetry study, this function uses simulation
 #' to estimate the probability of detecting a single area used by some proportion
 #' of the marked population, given the sample size of instrumented fish, as well
@@ -212,8 +213,9 @@ binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_a
 #' multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
 #'                       prop_ofareas = 0.9)
 #' @export
-multinomial_detection <- function(n_raw, prop_usedby, assumed_survival=0.8, observe_at_least=1,
+multinomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_at_least=1,
                                   prop_ofareas=1) {
+  .Deprecated("detection_probability")
   if(length(n_raw) > 1 |
      length(prop_usedby) > 1 |
      length(assumed_survival) > 1 |
@@ -237,3 +239,177 @@ multinomial_detection <- function(n_raw, prop_usedby, assumed_survival=0.8, obse
 # multinomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8, observe_at_least = 2)
 # multinomial_detection(n_raw=100, prop_usedby = 0.025, assumed_survival = .8)
 # multinomial_detection(n_raw=100, prop_usedby = 0.025, assumed_survival = .8, observe_at_least = 2)
+
+
+#' Detection Probability From a Given Sample Size, Assuming Random Sampling
+#' @description In the context of a telemetry study, this function estimates the
+#' probability of detecting a single area used by some proportion
+#' of the marked population, given the sample size of instrumented fish, and
+#' optionally the probability of detecting MULTIPLE areas, assuming random sampling from
+#' a worst-case scenario.
+#'
+#' The function can use either the Binomial or Poisson probability models, and
+#' the probability of detecting a given (single) use area is calculated from
+#'
+#' `pbinom(q = observe_at_least-1,`
+#'
+#' `       size = round(n_raw*assumed_survival),`
+#'
+#' `       prob = prop_usedby,`
+#'
+#' `       lower.tail = FALSE)`
+#'
+#' or
+#'
+#' `ppois(q = observe_at_least-1,`
+#'
+#' `      lambda = n_raw*assumed_survival*prop_usedby,`
+#'
+#' `      lower.tail = FALSE)`
+#'
+#' for single inputs.
+#'
+#' The probability of simultaneously detecting all (or some proportion of) areas
+#' used by a given proportion of the marked population is estimated by considering
+#' a worst-case scenario in which there are many such use areas, used by the
+#' proportion specified by `prop_usedby=`.  For example, if the proportion supplied
+#' is 5%, a scenario with twenty (=1/0.05) areas with equal probabilities is
+#' considered.  It can be shown that simultaneous detection
+#' is itself Binomially distributed, and the probability of simultaneous detection
+#' can be given by:
+#'
+#' \deqn{p(n \geq mq) = \sum_{n \in \{mq,...,m\}}p^n(1-p)^{m-n} {m \choose n}}
+#'
+#' in which \emph{p} gives the detection probability of a single area,
+#' \emph{m} gives the number of areas in a worst-case scenario, and
+#' \emph{q} gives the proportion of areas desired to detect.
+#'
+#' It should be noted that the probability model used for simultaneous detection
+#' assumes mutual independence among areas (that is, independent Binomial or
+#' Poisson trials, as opposed to Multinomial).  However, this may be a better
+#' reflection of reality, as it better allows for additional use areas beyond
+#' those considered (that is, those with less proportional usage than the
+#' value considered).
+#'
+#' Multiple values of all arguments may be supplied, in which case the output
+#' will be a table rather than a single value.  See examples for details.
+#'
+#' @param n_raw Trial value of sample size, before accounting for mortality.
+#' @param prop_usedby Hypothetical proportion of the population using the area
+#' considered.
+#' @param assumed_survival Assumed survival (or 1 - data loss proportion).
+#' Defaults to `1`.
+#' @param observe_at_least Minimum number of marked individuals to consider as
+#' detection of an area.  Defaults to `1`, but a larger number may be used as
+#' necessary, depending on criterion used to define detection of an aggregation.
+#' @param model Assumed underlying probability model.  Allowed values are
+#' `"binomial"` and `"poisson"`.  Defaults to `"binomial"`.
+#' @param simplify Whether to simplify the output table to only show inputs with
+#' multiple values (see examples below).  Defaults to `TRUE`.
+#' @param prop_ofareas If simultaneous detection is desired , this gives the
+#' proportion of areas to simultaneously detect.  It may be
+#' desirable to structure a precision statement in terms of detection of some
+#' percentage of areas, see examples below.  If the default `NA` is accepted,
+#' simultaneous detection probability will not be calculated.
+#' @return Either a single value or table of inputs and calculated probabilities.
+#'
+#' * Column `$p_singlearea` gives the detection
+#' probability of a SINGLE given area.
+#'
+#' * Element `$p_multipleareas` gives the estimated SIMULTANEOUS detection probability
+#' of the proportion of areas specified.
+#' @author Matt Tyers
+#' @examples
+#' ## The probability of detecting a given area used by 5% of the population,
+#' ## given a sample size of n=80 and assuming 80% survival, is 96.2%.
+#' detection_probability(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8)
+#'
+#'
+#' ## The probability of detecting at least 95% of areas used by 5% of the
+#' ## population, given a sample size of n=80 and assuming 80% survival, is at
+#' ## least 97%.
+#' detection_probability(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
+#'                       prop_ofareas = 0.95)
+#'
+#'
+#' ## Multiple inputs can be specified, in which case a table will be returned.
+#' detection_probability(n_raw = c(80, 100),
+#'                       model = c("binomial", "poisson"),
+#'                       prop_usedby = 0.05,
+#'                       assumed_survival = 0.8,
+#'                       prop_ofareas = c(0.9, 1))
+#'
+#'
+#' ## The output table may be expanded with simplify=FALSE.
+#' detection_probability(n_raw = c(80, 100),
+#'                       model = c("binomial", "poisson"),
+#'                       prop_usedby = 0.05,
+#'                       assumed_survival = 0.8,
+#'                       prop_ofareas = c(0.9, 1),
+#'                       simplify = FALSE)
+#' @export
+detection_probability <- function(n_raw, prop_usedby,
+                                  assumed_survival=1, observe_at_least=1,
+                                  model="binomial", simplify=TRUE,
+                                  prop_ofareas=NA) {
+  if(!any(model %in% c("binomial","Binomial","poisson","Poisson"))) {
+    stop("model= argument must be \"binomial\" or \"poisson\"")
+  }
+
+  # expanding a grid of all possible combinations of input arguments except prop_ofareas
+  argmat <- expand.grid(n_raw=n_raw,
+                        prop_usedby=prop_usedby,
+                        assumed_survival=assumed_survival,
+                        observe_at_least=observe_at_least)
+
+  # initializing output objects
+  out_binom <- out_pois <- NULL
+
+  # defining possible output objects
+  if("binomial" %in% model | "Binomial" %in% model) {
+    out_binom <- cbind(argmat,
+                       model = "Binomial",
+                       p_singlearea = with(argmat, pbinom(q = observe_at_least-1,
+                                                          size = round(n_raw*assumed_survival),
+                                                          prob = prop_usedby,
+                                                          lower.tail = FALSE)))
+  }
+  if("poisson" %in% model | "Poisson" %in% model) {
+    out_pois <- cbind(argmat,
+                      model = "Poisson",
+                      p_singlearea = with(argmat, ppois(q = observe_at_least-1,
+                                                        lambda = n_raw*assumed_survival*prop_usedby,
+                                                        lower.tail = FALSE)))
+  }
+  pmat <- rbind(out_binom, out_pois)   # combining
+
+  # if we also want simultaneous detection probability of multiple areas
+  if(all(!is.na(prop_ofareas))) {
+
+    # expanding the prop_ofareas awkwardly
+    # maybe it's bad that I'm modifying pmat in place
+    pmat <- cbind(do.call(rbind, replicate(length(prop_ofareas), pmat, simplify=FALSE)),
+                  prop_ofareas = rep(prop_ofareas, each=nrow(pmat)),
+                  p_multipleareas = NA)
+
+    # calculating multiple detection for each row of above!
+    for(irow in 1:nrow(pmat)) {  # I'm sure there's a more elegant way to do this, but loops work too
+      n_areas <- with(pmat[irow, ], round(1/prop_usedby))   # total number of resulting areas
+      n_atleast <- (1:n_areas)[(1:n_areas)/n_areas >= pmat$prop_ofareas[irow]]  # results that could satisfy
+      pp <- pmat$p_singlearea[irow]  # just a simplified vbl name
+
+      # actual calculation
+      pmat$p_multipleareas[irow] <- sum((pp^n_atleast)*((1-pp)^(n_areas-n_atleast))*choose(n_areas, n_atleast))
+    }
+  }
+
+  # simplifying
+  if(simplify) {
+    if(nrow(pmat) > 1) {
+      pmat <- pmat[, apply(pmat, 2, function(x) length(unique(x)) > 1)]
+    } else {
+      pmat <- pmat[, names(pmat) %in% c("p_singlearea", "p_multipleareas")]
+    }
+  }
+  return(pmat)
+}

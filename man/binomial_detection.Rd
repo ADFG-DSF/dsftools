@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample_size.R
 \name{binomial_detection}
 \alias{binomial_detection}
-\title{Detection Probability From a Given Sample Size, Assuming Binomial}
+\title{Detection Probability From a Given Sample Size, Assuming Binomial (Deprecated)}
 \usage{
 binomial_detection(
   n_raw,
