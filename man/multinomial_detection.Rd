@@ -62,7 +62,7 @@ multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8)
 
 
 ## The probability of detecting 90\% of areas used by 5\% of the population, given
-## a sample size of n=80 and assuming 80\% survival, is at least 97\%.
+## a sample size of n=80 and assuming 80\% survival, is at least 82.8\%.
 multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
                       prop_ofareas = 0.9)
 }
