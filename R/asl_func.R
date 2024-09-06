@@ -2322,6 +2322,21 @@ $$\\hat{var}[\\bar{x}]=\\frac{\\sum_{i=1}^{n}(x_{i}-\\bar{x})^2}{n(n-1)}$$")
 
   ### Printing references
 
+#   cat("
+#
+# All calculations were performed in R^[",
+#       capture.output(print(citation(), style="text")),
+#       "] using the dsftools package.^[",
+#       capture.output(print(citation("dsftools"), style="text")),
+#       "]", sep="")
+  cat("
+
+All calculations were performed in R^[")
+cat(capture.output(print(citation(), style="text")))
+cat("] using the dsftools package.^[")
+cat(capture.output(print(citation("dsftools"), style="text")))
+cat("]")
+
   cat("
 
 ## References
@@ -2347,9 +2362,9 @@ cat("Casella, George and Roger L. Berger. 2002. *Statistical Inference*. Austral
 
 ")
   }
-  print(citation(), style="text")
-  cat("\n")
-  print(citation("dsftools"), style="text")
-  cat("\n")
-  print(citation("knitr"), style="text")
+  # print(citation(), style="text")
+  # cat("\n")
+  # print(citation("dsftools"), style="text")
+  # cat("\n")
+  # print(citation("knitr"), style="text")
 }
