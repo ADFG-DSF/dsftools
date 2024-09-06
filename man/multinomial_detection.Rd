@@ -58,13 +58,17 @@ If the probability of detection of just a single area is desired,
 \examples{
 ## The probability of detecting all areas used by 5\% of the population, given
 ## a sample size of n=80 and assuming 80\% survival, is at least 44\%.
+suppressWarnings({
 multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8)
+})
 
 
 ## The probability of detecting 90\% of areas used by 5\% of the population, given
 ## a sample size of n=80 and assuming 80\% survival, is at least 82.8\%.
+suppressWarnings({
 multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
                       prop_ofareas = 0.9)
+})
 }
 \seealso{
 \link{detection_probability}

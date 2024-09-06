@@ -118,30 +118,44 @@ rp <- function(sim_vec, true_val,
 #' @examples
 #' ## The probability of detecting an area used by 5% of the population, given
 #' ## a sample size of n=100 and assuming 80% survival.
+#' suppressWarnings({
 #' binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)
+#' })
 #'
 #' ## examples with vector-valued input:
+#' suppressWarnings({
 #' binomial_detection(n_raw=c(80, 100), prop_usedby = 0.05, assumed_survival = .8)
+#' })
+#' suppressWarnings({
 #' binomial_detection(n_raw=100, prop_usedby = c(0.025, 0.05), assumed_survival = .8)
+#' })
 #'
 #' ## if multiple vectors are used, evaluation will be strictly vector-wise
+#' suppressWarnings({
 #' binomial_detection(n_raw=c(80, 100), prop_usedby = c(0.025, 0.05))
+#' })
 #'
 #' ## but outer() may be used if a 2d matrix is desired?
 #' n_raw_trial <- c(80, 100)
 #' prop_usedby_trial <- c(0.025, 0.05)
 #' names(n_raw_trial) <- n_raw_trial              ## optional but useful
 #' names(prop_usedby_trial) <- prop_usedby_trial  ## optional but useful
+#' suppressWarnings({
 #' outer(n_raw_trial, prop_usedby_trial, FUN=binomial_detection)
+#' })
+#' suppressWarnings({
 #' outer(n_raw_trial, prop_usedby_trial, FUN=binomial_detection, assumed_survival=0.8)
+#' })
 #'
 #' ## using outer() with different arguments
 #' n_raw_trial <- c(80, 100)
 #' survival_trial <- c(1, 0.9, 0.8)
+#' suppressWarnings({
 #' outer(X=n_raw_trial, Y=survival_trial,
 #'       FUN=function(X,Y) binomial_detection(n_raw=X,
 #'                                            prop_usedby=0.05,
 #'                                            assumed_survival=Y))
+#' })
 #' @export
 binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_at_least=1) {
   .Deprecated("detection_probability")
@@ -205,13 +219,17 @@ binomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_a
 #' @examples
 #' ## The probability of detecting all areas used by 5% of the population, given
 #' ## a sample size of n=80 and assuming 80% survival, is at least 44%.
+#' suppressWarnings({
 #' multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8)
+#' })
 #'
 #'
 #' ## The probability of detecting 90% of areas used by 5% of the population, given
 #' ## a sample size of n=80 and assuming 80% survival, is at least 82.8%.
+#' suppressWarnings({
 #' multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8,
 #'                       prop_ofareas = 0.9)
+#' })
 #' @export
 multinomial_detection <- function(n_raw, prop_usedby, assumed_survival=1, observe_at_least=1,
                                   prop_ofareas=1) {

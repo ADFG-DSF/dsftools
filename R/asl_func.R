@@ -1696,6 +1696,7 @@ ASL_table <- function(age=NULL,
 #' ```
 #' }
 #' @importFrom utils citation
+#' @importFrom utils capture.output
 #' @export
 ASL_boilerplate <- function(stratified=NULL,   # logical TRUE or FALSE
                             abundance=NULL,   # c("known", "estimated", "unknown")

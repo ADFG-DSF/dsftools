@@ -657,21 +657,23 @@ test_that("subsets", {
 })
 
 test_that("binomial_detection and multinomial_detection", {
-  expect_equal(binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8),
+  expect_equal(suppressWarnings(binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)),
                0.9834846, tolerance=0.000001)
-  expect_equal(binomial_detection(n_raw=c(80,100), prop_usedby = 0.05),
+  expect_equal(suppressWarnings(binomial_detection(n_raw=c(80,100), prop_usedby = 0.05)),
                c(0.9834846, 0.9940795), tolerance=0.000001)
-  expect_equal(binomial_detection(n_raw=80, prop_usedby = c(0.025, 0.05)),
+  expect_equal(suppressWarnings(binomial_detection(n_raw=80, prop_usedby = c(0.025, 0.05))),
                c(0.8680622, 0.9834846), tolerance=0.000001)
-  expect_equal(multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8),
+  expect_equal(suppressWarnings(multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8)),
                list(avg_p_detected=0.9624075, p_all_detected=0.43937), tolerance=0.02)
-  expect_equal(multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8, prop_ofareas = 0.9),
+  expect_equal(suppressWarnings(multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8, prop_ofareas = 0.9)),
                list(avg_p_detected=0.9624075, p_all_detected=0.97386), tolerance=0.01)
-  expect_error(multinomial_detection(n_raw = c(80,100), prop_usedby = 0.05, assumed_survival = .8),
+  expect_error(suppressWarnings(multinomial_detection(n_raw = c(80,100), prop_usedby = 0.05, assumed_survival = .8)),
                "Evaluation of inputs with length > 1 is not currently implemented.")
-  expect_equal(binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8),
-               multinomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)$avg_p_detected,
+  expect_equal(suppressWarnings(binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)),
+               suppressWarnings(multinomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8)$avg_p_detected),
                tolerance = 0.002)
+  expect_warning(binomial_detection(n_raw=100, prop_usedby = 0.05, assumed_survival = .8))
+  expect_warning(multinomial_detection(n_raw = 80, prop_usedby = 0.05, assumed_survival = .8, prop_ofareas = 0.9))
 })
 
 test_that("detection_probability", {
