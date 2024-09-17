@@ -751,7 +751,7 @@ ASL_table <- function(age=NULL,
         if(verbose) cat("\n", "Finite Population Correction factor NOT used for proportions", "\n")
       }
 
-      out_ntot <- sum(out$n)
+      out_ntot <- sum(out$n, na.rm=TRUE)      ########### this should have a na.rm=TRUE
       out$phat <- out$n/out_ntot
       out$se_phat <- sqrt(out$phat*(1-out$phat)/(out_ntot-1)*FPC_prop)
 
