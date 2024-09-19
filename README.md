@@ -45,7 +45,7 @@ devtools::install_github("ADFG-DSF/dsftools")
 * `se()`: standard error, defined as sd/sqrt(n)
 * `plotcor()`: a method for plotting a correlation matrix (mostly stolen from `jagshelper::plotcor_jags()`)
 * `%inside%`, `%inside()%`, `%inside[)%`, and `%inside(]%`: shorthand for checking if elements of a numeric vector are within a specified interval
-* `%s_l%, `%s_leq%, `%s_g%, `%s_geq%, `%s_inside%, `%s_inside()%, `%s_inside[)%, and `%s_inside[)%: shortcuts for vector subsetting
+* `%s_l%`, `%s_leq%`, `%s_g%`, `%s_geq%`, `%s_inside%`, `%s_inside()%`, `%s_inside[)%`, and `%s_inside[)%`: shortcuts for vector subsetting
 
 ## What is an R package, and why is `dsftools` structured like one?
 
