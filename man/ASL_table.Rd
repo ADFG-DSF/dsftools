@@ -8,6 +8,7 @@ ASL_table(
   age = NULL,
   sex = NULL,
   length = NULL,
+  length_cat = NULL,
   stratum = NULL,
   Nhat = NULL,
   se_Nhat = NULL,
@@ -23,7 +24,10 @@ omitted from the resulting table.}
 \item{sex}{Vector of sex.  If the default (\code{NULL}) is accepted, sex will be
 omitted from the resulting table.}
 
-\item{length}{Vector of length.  If the default (\code{NULL}) is accepted, length
+\item{length}{Vector of length, treated as NUMERIC.  If the default (\code{NULL}) is accepted, length
+will be omitted from the resulting table.}
+
+\item{length_cat}{Vector of length, treated as CATEGORICAL.  If the default (\code{NULL}) is accepted, length
 will be omitted from the resulting table.}
 
 \item{stratum}{Optional vector of stratum, if stratified estimators will be
@@ -58,16 +62,16 @@ used if the abundance is considered to be known without error.
 }}
 }
 \value{
-A data.frame with rows corresponding to categories of age and/or sex,
+A data.frame with rows corresponding to categories of age, sex, and/or length,
 depending on data inputs.
 \subsection{Stratified - If abundance is known without error}{
 \subsection{If there are proportions}{
 
-The proportion of each age and/or sex category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
+The proportion of each age, sex, and/or length category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
 
 \deqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
 
-in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age and/or sex category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age and/or sex determination within sampling stratum \eqn{t}.
+in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age, sex, and/or length category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age, sex, and/or length determination within sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\hat{p}_{tz}} will be estimated as the following (Cochran 1977), in which \eqn{N_t} represents the total abundance of fish in sampling stratum \emph{t}:
 
@@ -77,7 +81,7 @@ if the finite population correction factor (FPC) is used; otherwise, as the foll
 
 \deqn{\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}}
 
-The total abundance by age and/or sex category in each sampling stratum will be estimated as follows:
+The total abundance by age, sex, and/or length category in each sampling stratum will be estimated as follows:
 
 \deqn{\hat{N}_{tz}=N_t\hat{p}_{tz}}
 
@@ -85,7 +89,7 @@ with variance estimated as
 
 \deqn{\hat{var}[\hat{N}_{tz}]=N_t^2\hat{var}[\hat{p}_{tz}]}
 
-The total abundance by age and/or sex category and its variance will then be estimated by summation as follows:
+The total abundance by age, sex, and/or length category and its variance will then be estimated by summation as follows:
 
 \deqn{\hat{N}_z=\sum_{t=1}^{L}\hat{N}_{tz}}
 
@@ -95,7 +99,7 @@ and
 
 where \eqn{L} equals the number of sampling strata.
 
-Finally, the overall proportion by age and/or sex category and its variance will be estimated as follows:
+Finally, the overall proportion by age, sex, and/or length category and its variance will be estimated as follows:
 
 \deqn{\hat{p}_z=\frac{\hat{N}_z}{N}}
 
@@ -105,11 +109,11 @@ and
 
 where \eqn{N} is the total abundance across all sampling periods.
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 \deqn{\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}}
 
-where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age and/or sex \eqn{z} during sampling stratum \eqn{t}.
+where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age, sex, and/or length \eqn{z} during sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\bar{x}_{tz}} will be estimated as
 
@@ -120,7 +124,7 @@ if the finite population correction factor (FPC) will be used; otherwise, as the
 
 \deqn{\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}}
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 \deqn{\bar{x}_z=\sum_{t=1}^{L}\frac{\hat{N}_{tz}}{\hat{N}_z}\bar{x}_{tz}}
 
@@ -158,11 +162,11 @@ and
 \subsection{Stratified - If abundance is estimated with error}{
 \subsection{If there are proportions}{
 
-The proportion of each age and/or sex category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
+The proportion of each age, sex, and/or length category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
 
 \deqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
 
-in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age and/or sex category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age and/or sex determination within sampling stratum \eqn{t}.
+in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age, sex, and/or length category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age, sex, and/or length determination within sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\hat{p}_{tz}} will be estimated as the following (Cochran 1977) in which \eqn{\hat{N}_t} is the estimated abundance of fish in sampling stratum \eqn{t}:
 
@@ -172,7 +176,7 @@ if the finite population correction factor (FPC) is used; otherwise, as the foll
 
 \deqn{\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}}
 
-The total abundance by age and/or sex category in each sampling stratum will be estimated as follows:
+The total abundance by age, sex, and/or length category in each sampling stratum will be estimated as follows:
 
 \deqn{\hat{N}_{tz}=\hat{N}_t\hat{p}_{tz}}
 
@@ -180,7 +184,7 @@ with variance estimated as (Goodman 1960):
 
 \deqn{\hat{var}[\hat{N}_{tz}]=\hat{N}_t^2\hat{var}[\hat{p}_{tz}] + \hat{p}_{tz}^2\hat{var}[\hat{N}_t]-\hat{var}[\hat{p}_{tz}]\hat{var}[\hat{p}_{tz}]}
 
-The total abundance by age and/or sex category \eqn{z} and its variance will then be estimated by summation as follows:
+The total abundance by age, sex, and/or length category \eqn{z} and its variance will then be estimated by summation as follows:
 
 \deqn{\hat{N}_z=\sum_{t=1}^{L}\hat{N}_{tz}}
 
@@ -190,7 +194,7 @@ and
 
 where \eqn{L} equals the number of sampling strata.
 
-Finally, the overall proportion by age and/or sex category and its variance will be estimated as follows:
+Finally, the overall proportion by age, sex, and/or length category and its variance will be estimated as follows:
 
 \deqn{\hat{p}_z=\frac{\hat{N}_z}{\sum_{t=1}^{L}\hat{N}_t}}
 
@@ -202,11 +206,11 @@ in which
 
 \deqn{\hat{cov}[\hat{N}_z,\sum_{t=1}^{L}\hat{N}_t]=\sum_{t=1}^{L}\hat{p}_{tz}\hat{var}[\hat{N_t}]}
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 \deqn{\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}}
 
-where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age and/or sex \eqn{z} during sampling stratum \eqn{t}.
+where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age, sex, and/or length \eqn{z} during sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\bar{x}_{tz}} will be estimated as
 
@@ -216,7 +220,7 @@ if the finite population correction factor (FPC) is used; otherwise, as
 
 \deqn{\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}}
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 \deqn{\bar{x}_z=\sum_{t=1}^{L}\frac{\hat{N}_{tz}}{\hat{N}_z}\bar{x}_{tz}}
 
@@ -264,17 +268,17 @@ by means of the delta method (Casella & Berger 2002) and Goodman (1960), respect
 \subsection{Stratified - If abundance is unknown and sample weights are used}{
 \subsection{If there are proportions}{
 
-The proportion of each age and/or sex category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
+The proportion of each age, sex, and/or length category \emph{z} will be estimated for each sampling stratum \emph{t} as follows:
 
 \deqn{\hat{p}_{tz}=\frac{n_{tz}}{n_t}}
 
-in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age and/or sex category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age and/or sex determination within sampling stratum \eqn{t}.
+in which \eqn{n_{tz}} equals the number of fish sampled during sampling stratum \eqn{t} classified as age, sex, and/or length category \eqn{z}, and \eqn{n_t} equals the number of fish sampled for age, sex, and/or length determination within sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\hat{p}_{tz}} will be estimated as the following (Cochran 1977):
 
 \deqn{\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}}
 
-The overall proportion by age and/or sex category and its variance will be estimated as follows, in which \eqn{w_t} represents the sampling weight associated with stratum \emph{t} and \emph{L} equals the number of strata.  It is worth noting that weights \eqn{w_t} are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions.
+The overall proportion by age, sex, and/or length category and its variance will be estimated as follows, in which \eqn{w_t} represents the sampling weight associated with stratum \emph{t} and \emph{L} equals the number of strata.  It is worth noting that weights \eqn{w_t} are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions.
 
 \deqn{\hat{p}_z=\frac{\sum_{t=1}^Lw_t\hat{p}_{tz}}{\sum_{t=1}^Lw_t}}
 
@@ -282,17 +286,17 @@ and
 
 \deqn{\hat{var}[\hat{p}_z]=\frac{\sum_{t=1}^Lw_t^2\hat{var}[\hat{p}_{tz}]}{\left(\sum_{t=1}^Lw_t\right)^2}}
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 \deqn{\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}}
 
-where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age and/or sex \eqn{z} during sampling stratum \eqn{t}.
+where \eqn{x_{tzi}} is the length of the \emph{i}th fish sampled of age, sex, and/or length \eqn{z} during sampling stratum \eqn{t}.
 
 The sampling variance of \eqn{\bar{x}_{tz}} will be estimated as:
 
 \deqn{\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}}
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 \deqn{\bar{x}_z=\frac{\sum_{t=1}^{L}w_t\hat{p}_{tz}\bar{x}_{tz}}{\sum_{t=1}^{L}w_t\hat{p}_{tz}}}
 
@@ -325,7 +329,7 @@ and
 \subsection{Pooled (not stratified) - If abundance is known without error}{
 \subsection{If there are proportions}{
 
-#' Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
+#' Proportions of each age, sex, and/or length category \eqn{z} will be estimated as follows (Cochran 1977):
 
 \deqn{\hat{p}_z=\frac{n_z}{n}}
 
@@ -337,15 +341,15 @@ if total abundance \eqn{N} is known and the finite population correction factor 
 
 \deqn{\hat{var}[\hat{p}_z]=\frac{\hat{p}_z(1-\hat{p}_z)}{n-1}}
 
-in which \eqn{n_z} denotes the number of fish sampled in age and/or sex category \eqn{z}, \eqn{n} denotes the total number of fish sampled, and \emph{N} denotes the total abundance.
+in which \eqn{n_z} denotes the number of fish sampled in age, sex, and/or length category \eqn{z}, \eqn{n} denotes the total number of fish sampled, and \emph{N} denotes the total abundance.
 
-Total abundance for age and/or sex category \eqn{z} will be estimated as
+Total abundance for age, sex, and/or length category \eqn{z} will be estimated as
 
 \deqn{\hat{N}_z=N\hat{p}_z} and
 
 \deqn{\hat{var}[\hat{N}_z]=N^2\hat{var}[\hat{p}_z]}
 
-The mean length associated with age and/or sex category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} represents the length of the \emph{i}th fish in age and/or sex category \emph{z} and \eqn{n_z} represents the number of fish in age and/or sex category \emph{z} with an associated length measurement:
+The mean length associated with age, sex, and/or length category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} represents the length of the \emph{i}th fish in age, sex, and/or length category \emph{z} and \eqn{n_z} represents the number of fish in age, sex, and/or length category \emph{z} with an associated length measurement:
 
 \deqn{\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}}
 
@@ -378,7 +382,7 @@ if the finite population correction factor (FPC) is used, otherwise as:
 \subsection{Pooled (not stratified) - If abundance is estimated with error}{
 \subsection{If there are proportions}{
 
-Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
+Proportions of each age, sex, and/or length category \eqn{z} will be estimated as follows (Cochran 1977):
 
 \deqn{\hat{p}_z=\frac{n_z}{n}}
 
@@ -390,9 +394,9 @@ if the finite population correction factor (FPC) is used, otherwise as
 
 \deqn{\hat{var}[\hat{p}]=\frac{\hat{p}(1-\hat{p})}{n-1}}
 
-in which \eqn{n_z} denotes the number of fish sampled in age and/or sex category \eqn{z}, \eqn{n} denotes the total number of fish sampled, and \eqn{\hat{N}} denotes the estimated abundance.
+in which \eqn{n_z} denotes the number of fish sampled in age, sex, and/or length category \eqn{z}, \eqn{n} denotes the total number of fish sampled, and \eqn{\hat{N}} denotes the estimated abundance.
 
-Total abundance for age and/or sex category \eqn{z} will be estimated as follows (Goodman 1960):
+Total abundance for age, sex, and/or length category \eqn{z} will be estimated as follows (Goodman 1960):
 
 \deqn{\hat{N}_z=\hat{N}\hat{p}_z}
 
@@ -400,7 +404,7 @@ and
 
 \deqn{\hat{var}[\hat{N}_z]=\hat{N}^2\hat{var}[\hat{p}_z] + \hat{p}_z^2\hat{var}[\hat{N}]-\hat{var}[\hat{N}]\hat{var}[\hat{p}_z]}
 
-The mean length associated with age and/or sex category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} represents the length of fish \emph{i} within age and/or sex category category \emph{z}, and \eqn{n_z} denotes the number of fish within age and/or sex category \emph{z} with an associated length measurement:
+The mean length associated with age, sex, and/or length category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} represents the length of fish \emph{i} within age, sex, and/or length category category \emph{z}, and \eqn{n_z} denotes the number of fish within age, sex, and/or length category \emph{z} with an associated length measurement:
 
 \deqn{\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}}
 
@@ -433,7 +437,7 @@ if the finite population correction factor (FPC) is used, otherwise as:
 \subsection{Pooled (not stratified) - If abundance is unknown}{
 \subsection{If there are proportions}{
 
-Proportions of each age and/or sex category \eqn{z} will be estimated as follows (Cochran 1977):
+Proportions of each age, sex, and/or length category \eqn{z} will be estimated as follows (Cochran 1977):
 
 \deqn{\hat{p}_z=\frac{n_z}{n}}
 
@@ -441,9 +445,9 @@ and
 
 \deqn{\hat{var}[\hat{p}_z]=\frac{\hat{p}_z(1-\hat{p}_z)}{n-1}}
 
-in which \eqn{n_z} denotes the number of fish sampled in age and/or sex category \eqn{z}, and \eqn{n} denotes the total number of fish sampled.
+in which \eqn{n_z} denotes the number of fish sampled in age, sex, and/or length category \eqn{z}, and \eqn{n} denotes the total number of fish sampled.
 
-The mean length associated with age and/or sex category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} denotes the length measurement associated with the \emph{i}th fish in age and/or sex category \emph{z}:
+The mean length associated with age, sex, and/or length category \eqn{z} will be estimated as the following, in which \eqn{x_{zi}} denotes the length measurement associated with the \emph{i}th fish in age, sex, and/or length category \emph{z}:
 
 \deqn{\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}}
 
@@ -475,8 +479,8 @@ scenarios:
 \item Data available for Age, Sex, and Length vs. some subset.
 }
 
-The function will return a table with rows for each combination of Age and
-Sex (as available), and will summarize the respective proportions, estimated
+The function will return a table with rows for each combination of Age, Sex, and
+Length (as available), and will summarize the respective proportions, estimated
 abundance, and associated Lengths (as available).
 
 Generally, \code{NULL} values in a given data vector indicate that the vector will

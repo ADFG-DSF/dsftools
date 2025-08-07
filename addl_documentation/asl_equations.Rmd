@@ -9,11 +9,11 @@ output: word_document
 
 #### If there are proportions
 
-The proportion of each age and/or sex category *z* will be estimated for each sampling stratum *t* as follows:
+The proportion of each age, sex, and/or length category *z* will be estimated for each sampling stratum *t* as follows:
 
 $$\hat{p}_{tz}=\frac{n_{tz}}{n_t}$$
 
-in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age and/or sex category $z$, and $n_t$ equals the number of fish sampled for age and/or sex determination within sampling stratum $t$.
+in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age, sex, and/or length category $z$, and $n_t$ equals the number of fish sampled for age, sex, and/or length determination within sampling stratum $t$.
 
 The sampling variance of $\hat{p}_{tz}$ will be estimated as the following (Cochran 1977), in which $N_t$ represents the total abundance of fish in sampling stratum *t*:
 
@@ -23,7 +23,7 @@ if the finite population correction factor (FPC) is used; otherwise, as the foll
 
 $$\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}$$
 
-The total abundance by age and/or sex category in each sampling stratum will be estimated as follows:
+The total abundance by age, sex, and/or length category in each sampling stratum will be estimated as follows:
 
 $$\hat{N}_{tz}=N_t\hat{p}_{tz}$$
 
@@ -31,7 +31,7 @@ with variance estimated as
 
 $$\hat{var}[\hat{N}_{tz}]=N_t^2\hat{var}[\hat{p}_{tz}]$$
 
-The total abundance by age and/or sex category and its variance will then be estimated by summation as follows:
+The total abundance by age, sex, and/or length category and its variance will then be estimated by summation as follows:
 
 $$\hat{N}_z=\sum_{t=1}^{L}\hat{N}_{tz}$$
 
@@ -41,7 +41,7 @@ $$\hat{var}[\hat{N}_{z}]=\sum_{t=1}^{L}\hat{var}[\hat{N}_{tz}]$$
 
 where $L$ equals the number of sampling strata.
 
-Finally, the overall proportion by age and/or sex category and its variance will be estimated as follows:
+Finally, the overall proportion by age, sex, and/or length category and its variance will be estimated as follows:
 
 $$\hat{p}_z=\frac{\hat{N}_z}{N}$$
 
@@ -51,11 +51,11 @@ $$\hat{var}[\hat{p}_z]=\frac{\hat{var}[\hat{N}_z]}{N^2}$$
 
 where $N$ is the total abundance across all sampling periods.
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 $$\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
 
-where $x_{tzi}$ is the length of the *i*th fish sampled of age and/or sex $z$ during sampling stratum $t$.
+where $x_{tzi}$ is the length of the *i*th fish sampled of age, sex, and/or length $z$ during sampling stratum $t$.
 
 The sampling variance of $\bar{x}_{tz}$ will be estimated as
 
@@ -65,7 +65,7 @@ if the finite population correction factor (FPC) will be used; otherwise, as the
 
 $$\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 $$\bar{x}_z=\sum_{t=1}^{L}\frac{\hat{N}_{tz}}{\hat{N}_z}\bar{x}_{tz}$$
 
@@ -101,11 +101,11 @@ $$\hat{var}[\bar{x}]=\sum_{t=1}^L\left(\frac{N_t}{N}\right)^2 \hat{var}[\bar{x}_
 
 #### If there are proportions
 
-The proportion of each age and/or sex category *z* will be estimated for each sampling stratum *t* as follows:
+The proportion of each age, sex, and/or length category *z* will be estimated for each sampling stratum *t* as follows:
 
 $$\hat{p}_{tz}=\frac{n_{tz}}{n_t}$$
 
-in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age and/or sex category $z$, and $n_t$ equals the number of fish sampled for age and/or sex determination within sampling stratum $t$.
+in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age, sex, and/or length category $z$, and $n_t$ equals the number of fish sampled for age, sex, and/or length determination within sampling stratum $t$.
 
 The sampling variance of $\hat{p}_{tz}$ will be estimated as the following (Cochran 1977) in which $\hat{N}_t$ is the estimated abundance of fish in sampling stratum $t$:
 
@@ -115,7 +115,7 @@ if the finite population correction factor (FPC) is used; otherwise, as the foll
 
 $$\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}$$
 
-The total abundance by age and/or sex category in each sampling stratum will be estimated as follows:
+The total abundance by age, sex, and/or length category in each sampling stratum will be estimated as follows:
 
 $$\hat{N}_{tz}=\hat{N}_t\hat{p}_{tz}$$
 
@@ -123,7 +123,7 @@ with variance estimated as (Goodman 1960):
 
 $$\hat{var}[\hat{N}_{tz}]=\hat{N}_t^2\hat{var}[\hat{p}_{tz}] + \hat{p}_{tz}^2\hat{var}[\hat{N}_t]-\hat{var}[\hat{p}_{tz}]\hat{var}[\hat{p}_{tz}]$$
 
-The total abundance by age and/or sex category $z$ and its variance will then be estimated by summation as follows:
+The total abundance by age, sex, and/or length category $z$ and its variance will then be estimated by summation as follows:
 
 $$\hat{N}_z=\sum_{t=1}^{L}\hat{N}_{tz}$$
 
@@ -133,7 +133,7 @@ $$\hat{var}[\hat{N}_{z}]=\sum_{t=1}^{L}\hat{var}[\hat{N}_{tz}]$$
 
 where $L$ equals the number of sampling strata.
 
-Finally, the overall proportion by age and/or sex category and its variance will be estimated as follows:
+Finally, the overall proportion by age, sex, and/or length category and its variance will be estimated as follows:
 
 $$\hat{p}_z=\frac{\hat{N}_z}{\sum_{t=1}^{L}\hat{N}_t}$$
 
@@ -145,11 +145,11 @@ in which
 
 $$\hat{cov}[\hat{N}_z,\sum_{t=1}^{L}\hat{N}_t]=\sum_{t=1}^{L}\hat{p}_{tz}\hat{var}[\hat{N_t}]$$
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 $$\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
 
-where $x_{tzi}$ is the length of the *i*th fish sampled of age and/or sex $z$ during sampling stratum $t$.
+where $x_{tzi}$ is the length of the *i*th fish sampled of age, sex, and/or length $z$ during sampling stratum $t$.
 
 The sampling variance of $\bar{x}_{tz}$ will be estimated as
 
@@ -159,7 +159,7 @@ if the finite population correction factor (FPC) is used; otherwise, as
 
 $$\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 $$\bar{x}_z=\sum_{t=1}^{L}\frac{\hat{N}_{tz}}{\hat{N}_z}\bar{x}_{tz}$$
 
@@ -205,17 +205,17 @@ by means of the delta method (Casella & Berger 2002) and Goodman (1960), respect
 
 #### If there are proportions
 
-The proportion of each age and/or sex category *z* will be estimated for each sampling stratum *t* as follows:
+The proportion of each age, sex, and/or length category *z* will be estimated for each sampling stratum *t* as follows:
 
 $$\hat{p}_{tz}=\frac{n_{tz}}{n_t}$$
 
-in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age and/or sex category $z$, and $n_t$ equals the number of fish sampled for age and/or sex determination within sampling stratum $t$.
+in which $n_{tz}$ equals the number of fish sampled during sampling stratum $t$ classified as age, sex, and/or length category $z$, and $n_t$ equals the number of fish sampled for age, sex, and/or length determination within sampling stratum $t$.
 
 The sampling variance of $\hat{p}_{tz}$ will be estimated as the following (Cochran 1977):
 
 $$\hat{var}[\hat{p}_{tz}]=\frac{\hat{p}_{tz}(1-\hat{p}_{tz})}{n_t-1}$$
 
-The overall proportion by age and/or sex category and its variance will be estimated as follows, in which $w_t$ represents the sampling weight associated with stratum *t* and *L* equals the number of strata.  It is worth noting that weights $w_t$ are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions. 
+The overall proportion by age, sex, and/or length category and its variance will be estimated as follows, in which $w_t$ represents the sampling weight associated with stratum *t* and *L* equals the number of strata.  It is worth noting that weights $w_t$ are treated as constant (i.e. known without error), therefore all variance estimates must be interpreted as minima without further assumptions. 
 
 $$\hat{p}_z=\frac{\sum_{t=1}^Lw_t\hat{p}_{tz}}{\sum_{t=1}^Lw_t}$$
 
@@ -223,17 +223,17 @@ and
 
 $$\hat{var}[\hat{p}_z]=\frac{\sum_{t=1}^Lw_t^2\hat{var}[\hat{p}_{tz}]}{\left(\sum_{t=1}^Lw_t\right)^2}$$
 
-The mean length by age and/or sex for each sampling stratum will be estimated as follows:
+The mean length by age, sex, and/or length for each sampling stratum will be estimated as follows:
 
 $$\bar{x}_{tz}=\frac{\sum_{i=1}^{n_{tz}}x_{tzi}}{n_{tz}}$$
 
-where $x_{tzi}$ is the length of the *i*th fish sampled of age and/or sex $z$ during sampling stratum $t$.
+where $x_{tzi}$ is the length of the *i*th fish sampled of age, sex, and/or length $z$ during sampling stratum $t$.
 
 The sampling variance of $\bar{x}_{tz}$ will be estimated as:
 
 $$\hat{var}[\bar{x}_{tz}]=\frac{\sum_{i=1}^{n_{tz}}(x_{tzi}-\bar{x}_{tz})^2}{n_{tz}(n_{tz}-1)}$$
 
-The mean length by age and/or sex category will then be estimated as follows:
+The mean length by age, sex, and/or length category will then be estimated as follows:
 
 $$\bar{x}_z=\frac{\sum_{t=1}^{L}w_t\hat{p}_{tz}\bar{x}_{tz}}{\sum_{t=1}^{L}w_t\hat{p}_{tz}}$$
 
@@ -267,7 +267,7 @@ $$\hat{var}[\bar{x}]=\frac{\sum_{t=1}^L w_t^2\hat{var}[\bar{x}_t]}{\left(\sum_{t
 
 #### If there are proportions
 
-Proportions of each age and/or sex category $z$ will be estimated as follows (Cochran 1977):
+Proportions of each age, sex, and/or length category $z$ will be estimated as follows (Cochran 1977):
 
 $$\hat{p}_z=\frac{n_z}{n}$$
 
@@ -279,9 +279,9 @@ if total abundance $N$ is known and the finite population correction factor (FPC
 
 $$\hat{var}[\hat{p}_z]=\frac{\hat{p}_z(1-\hat{p}_z)}{n-1}$$
 
-in which $n_z$ denotes the number of fish sampled in age and/or sex category $z$, $n$ denotes the total number of fish sampled, and *N* denotes the total abundance.
+in which $n_z$ denotes the number of fish sampled in age, sex, and/or length category $z$, $n$ denotes the total number of fish sampled, and *N* denotes the total abundance.
 
-Total abundance for age and/or sex category $z$ will be estimated as
+Total abundance for age, sex, and/or length category $z$ will be estimated as
 
 $$\hat{N}_z=N\hat{p}_z$$ 
 
@@ -289,7 +289,7 @@ and
 
 $$\hat{var}[\hat{N}_z]=N^2\hat{var}[\hat{p}_z]$$
 
-The mean length associated with age and/or sex category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of the *i*th fish in age and/or sex category *z* and $n_z$ represents the number of fish in age and/or sex category *z* with an associated length measurement:
+The mean length associated with age, sex, and/or length category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of the *i*th fish in age, sex, and/or length category *z* and $n_z$ represents the number of fish in age, sex, and/or length category *z* with an associated length measurement:
 
 $$\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
 
@@ -323,7 +323,7 @@ $$\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}$$
 
 #### If there are proportions
 
-Proportions of each age and/or sex category $z$ will be estimated as follows (Cochran 1977):
+Proportions of each age, sex, and/or length category $z$ will be estimated as follows (Cochran 1977):
 
 $$\hat{p}_z=\frac{n_z}{n}$$
 
@@ -334,9 +334,9 @@ $$\hat{var}[\hat{p}]=\frac{\hat{p}(1-\hat{p})}{n-1}\left(\frac{\hat{N}-n}{\hat{N
 if the finite population correction factor (FPC) is used, otherwise as
 
 $$\hat{var}[\hat{p}]=\frac{\hat{p}(1-\hat{p})}{n-1}$$
-in which $n_z$ denotes the number of fish sampled in age and/or sex category $z$, $n$ denotes the total number of fish sampled, and $\hat{N}$ denotes the estimated abundance.
+in which $n_z$ denotes the number of fish sampled in age, sex, and/or length category $z$, $n$ denotes the total number of fish sampled, and $\hat{N}$ denotes the estimated abundance.
 
-Total abundance for age and/or sex category $z$ will be estimated as follows (Goodman 1960):
+Total abundance for age, sex, and/or length category $z$ will be estimated as follows (Goodman 1960):
 
 $$\hat{N}_z=\hat{N}\hat{p}_z$$
 
@@ -344,7 +344,7 @@ and
 
 $$\hat{var}[\hat{N}_z]=\hat{N}^2\hat{var}[\hat{p}_z] + \hat{p}_z^2\hat{var}[\hat{N}]-\hat{var}[\hat{N}]\hat{var}[\hat{p}_z]$$
 
-The mean length associated with age and/or sex category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of fish *i* within age and/or sex category category *z*, and $n_z$ denotes the number of fish within age and/or sex category *z* with an associated length measurement:
+The mean length associated with age, sex, and/or length category $z$ will be estimated as the following, in which $x_{zi}$ represents the length of fish *i* within age, sex, and/or length category category *z*, and $n_z$ denotes the number of fish within age, sex, and/or length category *z* with an associated length measurement:
 
 $$\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
 
@@ -376,7 +376,7 @@ $$\hat{var}[\bar{x}]=\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})^2}{n(n-1)}$$
 
 #### If there are proportions
 
-Proportions of each age and/or sex category $z$ will be estimated as follows (Cochran 1977):
+Proportions of each age, sex, and/or length category $z$ will be estimated as follows (Cochran 1977):
 
 $$\hat{p}_z=\frac{n_z}{n}$$
 
@@ -384,9 +384,9 @@ and
 
 $$\hat{var}[\hat{p}_z]=\frac{\hat{p}_z(1-\hat{p}_z)}{n-1}$$
 
-in which $n_z$ denotes the number of fish sampled in age and/or sex category $z$, and $n$ denotes the total number of fish sampled.
+in which $n_z$ denotes the number of fish sampled in age, sex, and/or length category $z$, and $n$ denotes the total number of fish sampled.
 
-The mean length associated with age and/or sex category $z$ will be estimated as the following, in which $x_{zi}$ denotes the length measurement associated with the *i*th fish in age and/or sex category *z*:
+The mean length associated with age, sex, and/or length category $z$ will be estimated as the following, in which $x_{zi}$ denotes the length measurement associated with the *i*th fish in age, sex, and/or length category *z*:
 
 $$\bar{x}_z=\frac{\sum_{i=1}^{n_z}x_{zi}}{n_z}$$
 

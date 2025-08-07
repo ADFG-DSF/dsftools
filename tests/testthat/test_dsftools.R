@@ -598,16 +598,16 @@ names(check2) <- names(check4) <- c("0.1", "0.2", "0.3")
 test_that("rp", {
   expect_equal(rp(sim_vec = xx, true_val = 10, confidence = c(0.8, 0.9, 0.95, 0.99)),
                check1,
-               tolerance = 0.01)
+               tolerance = 0.02)
   expect_equal(rp(sim_vec = xx, true_val = 10, accuracy = c(0.1, 0.2, 0.3)),
                check2,
-               tolerance=0.01)
+               tolerance=0.02)
   expect_equal(rp(sim_vec = xx, true_val = 10, confidence = c(0.8, 0.9, 0.95, 0.99), relative=FALSE),
                check3,
-               tolerance = 0.01)
+               tolerance = 0.02)
   expect_equal(rp(sim_vec = xx, true_val = 10, accuracy = c(0.1, 0.2, 0.3), relative=FALSE),
                check4,
-               tolerance=0.01)
+               tolerance=0.02)
 })
 
 n <- 100

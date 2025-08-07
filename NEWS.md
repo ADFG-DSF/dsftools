@@ -1,3 +1,7 @@
+# dsftools 0.1.7 (Aug 2025)
+
+Added a patch to `ASL_table()` and `ASL_boilerplate()` to allow for categorical (binned) lengths 
+
 # dsftools 0.1.6 (Sept 2024)
 
 Added a patch to `ASL_boilerplate()` to create footnotes for R and R package citations as appropriate (see p43 of https://www.adfg.alaska.gov/FedAidPDFs/SP22-08.pdf)

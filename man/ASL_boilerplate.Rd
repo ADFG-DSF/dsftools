@@ -13,6 +13,7 @@ ASL_boilerplate(
   age = NULL,
   sex = NULL,
   length = NULL,
+  length_cat = NULL,
   stratum = NULL,
   Nhat = NULL,
   se_Nhat = NULL,
@@ -27,7 +28,7 @@ ASL_boilerplate(
 \item{abundance}{Possible values of \code{c("known", "estimated", "unknown")},
 defining how abundance is treated.}
 
-\item{data}{A vector containing some subset of \code{c("age", "sex", "length")},
+\item{data}{A vector containing some subset of \code{c("age", "sex", "length", "length_cat")},
 depending on what data are present}
 
 \item{species}{Optional character to use for species.  Defaults to \code{"fish"}.}
@@ -42,6 +43,8 @@ values are \code{c(NA, "past", "present", "future")}}
 \item{sex}{Argument to \code{ASL_table()}.  Defaults to \code{NULL}.}
 
 \item{length}{Argument to \code{ASL_table()}.  Defaults to \code{NULL}.}
+
+\item{length_cat}{Argument to \code{ASL_table()}.  Defaults to \code{NULL}.}
 
 \item{stratum}{Argument to \code{ASL_table()}.  Defaults to \code{NULL}.}
 
