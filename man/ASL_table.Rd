@@ -182,7 +182,7 @@ The total abundance by age, sex, and/or length category in each sampling stratum
 
 with variance estimated as (Goodman 1960):
 
-\deqn{\hat{var}[\hat{N}_{tz}]=\hat{N}_t^2\hat{var}[\hat{p}_{tz}] + \hat{p}_{tz}^2\hat{var}[\hat{N}_t]-\hat{var}[\hat{p}_{tz}]\hat{var}[\hat{p}_{tz}]}
+\deqn{\hat{var}[\hat{N}_{tz}]=\hat{N}_t^2\hat{var}[\hat{p}_{tz}] + \hat{p}_{tz}^2\hat{var}[\hat{N}_t]-\hat{var}[\hat{N}_{t}]\hat{var}[\hat{p}_{tz}]}
 
 The total abundance by age, sex, and/or length category \eqn{z} and its variance will then be estimated by summation as follows:
 
