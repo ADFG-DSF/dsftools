@@ -1,3 +1,7 @@
+# dsftools 0.1.8 (Aug 2025)
+
+Added a patch to `ASL_boilerplate()`, the help file for `ASL_table()`, and `addl_documentation/asl_equations.Rmd` to fix a typo in one equation
+
 # dsftools 0.1.7 (Aug 2025)
 
 Added a patch to `ASL_table()` and `ASL_boilerplate()` to allow for categorical (binned) lengths 

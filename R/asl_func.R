@@ -478,6 +478,11 @@
 #' ASL_table(age=sim_data$data$age,
 #'           length=sim_data$data$length,
 #'           Nhat=100*1000)
+#'
+#' ### Recommended useage with length treated as categorical
+#' ASL_table(length_cat = cut(sim_data$data$length,
+#'                           breaks = c(0, 100, 200, 300, 400, 500, 600)),
+#'           Nhat = 100*1000)
 #' @importFrom grDevices adjustcolor grey.colors
 #' @importFrom graphics boxplot legend mosaicplot par points
 #' @importFrom stats rnorm sd var

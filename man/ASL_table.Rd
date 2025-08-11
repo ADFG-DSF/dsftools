@@ -520,6 +520,11 @@ ASL_table(age=sim_data$data$age,
 ASL_table(age=sim_data$data$age,
           length=sim_data$data$length,
           Nhat=100*1000)
+
+### Recommended useage with length treated as categorical
+ASL_table(length_cat = cut(sim_data$data$length,
+                          breaks = c(0, 100, 200, 300, 400, 500, 600)),
+          Nhat = 100*1000)
 }
 \references{
 Casella, George and Roger L. Berger. 2002. \emph{Statistical Inference}. Australia ; Pacific Grove, CA, Thomson Learning
